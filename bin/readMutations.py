@@ -1,35 +1,29 @@
 # Module for reading files with mutations.
 
-def mutations(mutationsFileName, givenChromosome = '', givenMutationType = '', givenSampleName = ''):
+
+def readMutations(mutationsFileName, givenMutationType=''):
     """
-    input: file with mutations, maybe specified chromosome or type or sampleName
-    output: list with mutations with specified parameters, every item in list is class
+    in: file with mutations, maybe specified type of mutation
+    out: list of mutations with givenMutationType, every item in list is class
     """
     with open(mutationsFileName) as mutationsFile:
         lines = mutationsFile.readlines()
-    
+
     allMutations = []
     for line in lines:
         splittedLine = line.split('\t')
+        if givenMutationType != '' and givenMutationType != splittedLine[1]:
+            continue
+
         mutation = {}
-        sampleName, mutationType, chromosome, positionFrom, positionTo, initialNucl, finalNucl, info = line.split('\t')
-        if givenChromosome != '' and givenChromosome != chromosome:
-            continue
-
-        if givenSampleName != '' and givenSampleName != sampleName:
-            continue
-
-        if givenMutationType != '' and givenMutationType != mutationType:
-            continue
-            
-        mutation['sampleName'] = sampleName
-        mutation['mutationType'] = mutationType
-        mutation['chromosome'] = chromosome
-        mutation['positionFrom'] = int(positionFrom)
-        mutation['positionTo'] = int(positionTo)
-        mutation['initialNucl'] = initialNucl
-        mutation['finalNucl'] = finalNucl
-        mutation['info'] = info
+        mutation['sampleName'] = splittedLine[0]
+        mutation['mutationType'] = splittedLine[1]
+        mutation['chromosome'] = splittedLine[2]
+        mutation['positionFrom'] = int(splittedLine[3])
+        mutation['positionTo'] = int(splittedLine[4])
+        mutation['initialNucl'] = splittedLine[5]
+        mutation['finalNucl'] = splittedLine[6]
+        mutation['info'] = splittedLine[7]
         allMutations.append(mutation)
 
-    return allMutations    
+    return allMutations
