@@ -18,17 +18,32 @@ REP_TIME_FILE = os.path.join(BREAST_DIR, 'replicationTiming')
 def calculateReplicationTiming(replicationTiming, position):
     """ Linear approximation of replication time between two points
     with known replication time. Returns -1 if one of neighbour has no
-    known replication time """
-    # TODO: implement
-    neighbour = (position - position % 1000) + 500
-    if neighbour in replicationTiming:
-        return replicationTiming[neighbour]
+    known replication time 
+    in: dictionary with replication timings in positions 500, 1500, 2500,..
+    and position
+    out: linear approximation of replication timing in position"""
+    if position % 1000 == 500:
+        return replicationTiming[position]
+
+    floor = (position - position % 1000)
+    if position % 1000 > 500:
+        leftNeighbour = floor + 500
+        rightNeighbour = floor + 1500
+    else:
+        leftNeighbour = floor - 500
+        rightNeighbour = floor + 500
+    
+    if leftNeighbour in replicationTiming and rightNeighbour in replicationTiming:
+        leftValue = replicationTiming[leftNeighbour]
+        rightValue = replicationTiming[rightNeighbour]
+        return leftValue + 1.0 * (rightValue - leftValue) * (position - leftNeighbour) / 1000
     else:
         return -1
 
 
 def getGenomeFileNames(genomeDir):
-    """ Returns a dict: genomeFileNames[chrNum] = full/path/to/seq/file """
+    """ in: directory with genome sequence files by chromosomes
+    out: a dictionary, where genomeFileNames[chrNum] = full/path/to/seq/file """
     genomeFileNames = {}
     for name in os.listdir(genomeDir):
         fullPath = os.path.join(genomeDir, name)
@@ -138,9 +153,6 @@ def drawAllPlots(dataDir, outputDir):
                 y.append(float(line))
         del y[0]
         x = [5 + 10 * i for i in range(9)]
-        # # print(fileName)
-        # print(x)
-        # print(y)
         plt.bar(x, y, width=10)
         plt.show()
         # plt.savefig(os.path.join(outputDir, os.path.basename(fileName)))

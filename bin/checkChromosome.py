@@ -2,8 +2,10 @@
 import sys
 import os
 
+# Check is nucleotides in mutation file placed according to genome
+
 if len(sys.argv) != 4:
-    print "Usage: {0} mutations.txt chromosome_genome chromosome_num".format(sys.argv[0])
+    print "Usage: {0} mutations genome_seq chromosome_num".format(sys.argv[0])
     sys.exit()
 
 

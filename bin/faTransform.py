@@ -8,7 +8,7 @@ if len(sys.argv) != 2:
 
 genomeSequence = ''
 with open(sys.argv[1], 'r') as genomeFile:
-        line = genomeFile.readline()
+        line = genomeFile.readline() # Miss header
         while line != '':
             line = genomeFile.readline()
             genomeSequence += line[:-1]
