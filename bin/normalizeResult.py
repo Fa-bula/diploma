@@ -6,6 +6,8 @@ import analyseMutations as am
 # Normalize number of mutations with each replication time
 # by number of APOBEG-motifs in genome with this replication time
 # This way, we get estimation of probability of mutation
+# Writes to output file outDir/<sampleName>:
+# <replicationTiming>\t<mutationProbability> 
 
 def normalizeResults(borders, normalizer, dataDir, outDir):
     """ Split data in bins, defined by borders list.
@@ -30,9 +32,13 @@ def normalizeResults(borders, normalizer, dataDir, outDir):
             numberOfPointsInBin[i] = numberOfPointsInBin[i] * 1.0 / normCoeff
         outFileName = os.path.join(outDir, os.path.basename(dataFileName))
         with open(outFileName, 'w') as outputFile:
-            for result in numberOfPointsInBin:
-                outputFile.write(str(result) + '\n')
-
+            outputFile.write("replicationTiming\tprobability\n")
+            for i, probability in enumerate(numberOfPointsInBin):
+                if 0 == i or i + 1 == len(numberOfPointsInBin):
+                    continue
+                replicationTiming = 1.0 * (borders[i - 1] + borders[i]) / 2
+                outputFile.write("{0}\t{1}\n".format(replicationTiming,
+                                                   probability))
     return
 
 
