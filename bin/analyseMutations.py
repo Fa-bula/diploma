@@ -2,9 +2,6 @@
 import sys
 import os
 import readMutations as rm
-import matplotlib.pyplot as plt
-
-# Signature of APOBEG mutations
 MOTIFS = ['TCT', 'TCA']         # initial motif
 FINAL_NUCL = ['G', 'T']         # final nucleotide
 
@@ -13,7 +10,9 @@ MUTATION_FILE = os.path.join(HOME, 'breast_canser_data/mutations')
 GENOME_DIR = os.path.join(HOME, 'genome/seq')
 BREAST_DIR = os.path.join(HOME, 'breast_canser_data')
 REP_TIME_FILE = os.path.join(BREAST_DIR, 'replicationTiming')
-
+ENRICHMENT_FILE = os.path.join(BREAST_DIR, 'enrichment')
+# Borders of bins, where we collect replication times
+BIN_START = [10 * i for i in range(9)]
 
 def calculateReplicationTiming(replicationTiming, position):
     """ Linear approximation of replication time between two points
@@ -23,8 +22,10 @@ def calculateReplicationTiming(replicationTiming, position):
     and position
     out: linear approximation of replication timing in position"""
     if position % 1000 == 500:
-        return replicationTiming[position]
-
+        if position in replicationTiming:
+            return replicationTiming[position]
+        else:
+            return -1
     floor = (position - position % 1000)
     if position % 1000 > 500:
         leftNeighbour = floor + 500
@@ -54,9 +55,9 @@ def getGenomeFileNames(genomeDir):
 
 GENOME_FILE_NAMES = getGenomeFileNames(GENOME_DIR)
 
-
 def createRepTimingSets():
-    """ Create dict with data from replication timing file """
+    """ out: dict with data from replication timing file with format:
+    replicationTimingSets[chromosome][position] = replicationTiming"""
     replicationTimingSets = {}
     # GENOME_FILE_NAMES[chromosome] = '/path/to/genome/'
     for chromosome in GENOME_FILE_NAMES:
@@ -83,9 +84,9 @@ def getRepTime(mutationFileName, sampleName, replicationTimingSets):
 
     # We consider chromosomes separately to avoid memory overflow:
     # All genome in str format ~ 3.1 GB - too much for RAM in my PC
-    for chromosome in genomeFileNames:
+    for chromosome in GENOME_FILE_NAMES:
         print('Considering chromosome #{0}...'.format(chromosome))
-        with open(genomeFileNames[chromosome], 'r') as genomeFile:
+        with open(GENOME_FILE_NAMES[chromosome], 'r') as genomeFile:
             genome = genomeFile.read()
 
         for mutation in allMutations:
@@ -105,21 +106,41 @@ def getRepTime(mutationFileName, sampleName, replicationTimingSets):
     return apobegMutationReplicationTimings
 
 
-def getMotifRepTime(chromosome, replicationTimingSets):
-    """ Retutns list of replication timings of positions in genome
+def getMotifRepTime(replicationTimingSets, chromosome):
+    """ Returns list of replication timings of positions in genome
     with particular motif and given chromosome """
-    with open(GENOME_FILE_NAMES[chromosome], 'r') as genomeFile:
-        genome = genomeFile.read()
-
     motifRepTimings = []
+   
+    with open(GENOME_FILE_NAMES[chromosome], 'r') as genomeFile:
+            genome = genomeFile.read()
     for motif in MOTIFS:
-        firstOccurrence = 0
+        # First occurence of beginning of motif
+        firstOccurrence = genome.find(motif, 0)
         while firstOccurrence >= 0:
-            firstOccurrence = genome.find(motif, firstOccurrence + 1)
-            # FIXME: maybe there should be  +1 or -1
-            replicationTiming = calculateReplicationTiming(replicationTimingSets[chromosome], firstOccurrence + 1)
+            # One +1 because str.find finds start of motif, but we want center
+            # Second +1 because str begins with 0th element
+            replicationTiming = calculateReplicationTiming(replicationTimingSets[chromosome],
+                                                           firstOccurrence + 2)
+            if replicationTiming == -1:
+                print('uncalculatable replication time at {0}:{1}'.format(chromosome, firstOccurrence + 2))
             motifRepTimings.append(replicationTiming)
+            firstOccurrence = genome.find(motif, firstOccurrence + 1)
     return motifRepTimings
+
+
+def onlyFiles(directory):
+    """ Returns list of full paths of files in directory """
+    return [os.path.join(directory, f) for f in os.listdir(directory)
+            if os.path.isfile(os.path.join(directory, f))]
+
+
+def getSampleNames():
+    """ out: list of sample names from enrichment file """
+    sampleNames =[]
+    with open(ENRICHMENT_FILE, 'r') as enrichmentFile:
+        for line in enrichmentFile:
+            sampleNames.append(line.split('\t')[0])
+    return sampleNames
 
 
 def splitToBins(points, binStart):
@@ -136,27 +157,6 @@ def splitToBins(points, binStart):
             numberOfPointsInBin[-1] += 1
 
     return numberOfPointsInBin
-
-
-def onlyFiles(directory):
-    """ Returns list of full paths of files in directory """
-    return [os.path.join(directory, f) for f in os.listdir(directory)
-            if os.path.isfile(os.path.join(directory, f))]
-
-
-def drawAllPlots(dataDir, outputDir):
-    fileNames = onlyFiles(dataDir)
-    for fileName in fileNames:
-        y = []
-        with open(fileName) as readFile:
-            for line in readFile:
-                y.append(float(line))
-        del y[0]
-        x = [5 + 10 * i for i in range(9)]
-        plt.bar(x, y, width=10)
-        plt.show()
-        # plt.savefig(os.path.join(outputDir, os.path.basename(fileName)))
-    return
 
 
 if __name__ == '__main__':

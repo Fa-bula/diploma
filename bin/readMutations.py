@@ -1,9 +1,9 @@
 # Module for reading files with mutations.
 
 
-def readMutations(mutationsFileName, givenMutationType='', givenSampleName=''):
-    """ in: file with mutations, maybe specified type of mutation and sample name
-    out: list of mutations with givenMutationType, every item in list is class """
+def readMutations(mutationsFileName, mutationType='', sampleNames=''):
+    """ in: file with mutations, maybe specified type of mutation and set of sample names
+    out: list of mutations with given mutationType, every item in list is dictionary """
 
     with open(mutationsFileName) as mutationsFile:
         lines = mutationsFile.readlines()
@@ -11,10 +11,10 @@ def readMutations(mutationsFileName, givenMutationType='', givenSampleName=''):
     allMutations = []
     for line in lines:
         splittedLine = line.split('\t')
-        if givenMutationType != '' and givenMutationType != splittedLine[1]:
+        if mutationType != '' and mutationType != splittedLine[1]:
             continue
 
-        if givenSampleName != '' and givenSampleName != splittedLine[0]:
+        if sampleNames != '' and splittedLine[0] not in sampleNames:
             continue
         
         mutation = {}

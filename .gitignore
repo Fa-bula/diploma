@@ -1,4 +1,6 @@
 /*
 !.gitignore
+!questions
+!README.md
 !/bin/
 /bin/*.pyc

@@ -1,31 +1,35 @@
 #!/usr/bin/python
 import os
+import sys
 import analyseMutations as am
 
-HOME = '/home/bulat/diploma/'
-MUTATION_FILE = os.path.join(HOME, 'breast_canser_data/mutations')
-GENOME_DIR = os.path.join(HOME, 'genome/seq')
-BREAST_DIR = os.path.join(HOME, 'breast_canser_data')
-REP_TIME_FILE = os.path.join(BREAST_DIR, 'replicationTiming')
+# Normalize number of mutations with each replication time
+# by number of APOBEG-motifs in genome with this replication time
+# This way, we get estimation of probability of mutation
 
+def normalizeResults(borders, normalizer, dataDir, outDir):
+    """ Split data in bins, defined by borders list.
+    Then divide numberOfPointsInBin[i] by normalizer[i]
+    IN: borders - list of bin's borders,
+    normalizer - list of normalization coefficients
+    dataDir - directory with data, should be splitted and normalized """
+    if len(normalizer) != len(borders) + 1:
+        sys.exit("Length of normalizer ({0}) should be equal to\
+        number of bins({1})".format(len(normalizer), len(borders) + 1))
 
-def normalizeResults(resultsDirectory, normalizer, borders):
-    """ Split results in bins, defined by borders list.
-    Then divide number of points in each bin by normalizer"""
-    resultsFileNames = [f for f in os.listdir(resultsDirectory) if os.path.isfile(os.path.join(resultsDirectory, f))]
-    OUTPUT_DIR = os.path.join(BREAST_DIR, 'mutation_replication_time', 'normalized')
+    dataFileNames = am.onlyFiles(dataDir)
 
-    for fileName in resultsFileNames:
-        results = []
-        with open(os.path.join(resultsDirectory, fileName)) as readFile:
-            for line in readFile:
-                results.append(float(line))
+    for dataFileName in dataFileNames:
+        points = []
+        with open(dataFileName, 'r') as dataFile:
+            for line in dataFile:
+                points.append(float(line))
 
-        numberOfPointsInBin = am.splitToBins(results, borders)
+        numberOfPointsInBin = am.splitToBins(points, borders)
         for i, normCoeff in enumerate(normalizer):
             numberOfPointsInBin[i] = numberOfPointsInBin[i] * 1.0 / normCoeff
-
-        with open(os.path.join(OUTPUT_DIR, fileName), 'w') as outputFile:
+        outFileName = os.path.join(outDir, os.path.basename(dataFileName))
+        with open(outFileName, 'w') as outputFile:
             for result in numberOfPointsInBin:
                 outputFile.write(str(result) + '\n')
 
@@ -33,12 +37,18 @@ def normalizeResults(resultsDirectory, normalizer, borders):
 
 
 if __name__ == '__main__':
-    RESULTS_DIRECTORY = os.path.join(BREAST_DIR, 'mutation_replication_time')
-    NORMALIZER_FILE = os.path.join(BREAST_DIR, 'totalStatistics')
-    normalizer = []
-    with open(NORMALIZER_FILE) as readFile:
-        for line in readFile:
-            normalizer.append(int(line))
+    if len(sys.argv) != 4:
+        sys.exit("Usage: {0} motifRepTimeDir mutationRepTimeDir\
+        outDir".format(sys.argv[0]))
 
-    borders = [i * 10 for i in range(9)]
-    normalizeResults(RESULTS_DIRECTORY, normalizer, borders)
+    motifDir = sys.argv[1]
+    normalizer = [0] * (len(am.BIN_START) + 1)
+    motifRepTimeFileList = am.onlyFiles(motifDir)
+    for fileName in motifRepTimeFileList:
+        with open(fileName) as readFile:
+            for i, line in enumerate(readFile):
+                normalizer[i] += int(line)
+
+    dataDir = sys.argv[2]
+    outDir = sys.argv[3]
+    normalizeResults(am.BIN_START, normalizer, dataDir, outDir)
