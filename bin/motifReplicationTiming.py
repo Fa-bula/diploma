@@ -4,7 +4,7 @@ import sys
 import os
 
 # Find out replication timing of all nucleotides, included in
-# APOBEG-motif: MOTIFS = ['TCT', 'TCA']
+# APOBEC-motif: MOTIFS = ['TCT', 'TCA']
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:

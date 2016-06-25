@@ -4,7 +4,7 @@ import sys
 import analyseMutations as am
 
 # Normalize number of mutations with each replication time
-# by number of APOBEG-motifs in genome with this replication time
+# by number of APOBEC-motifs in genome with this replication time
 # This way, we get estimation of probability of mutation
 # Writes to output file outDir/<sampleName>:
 # <replicationTiming>\t<mutationProbability> 

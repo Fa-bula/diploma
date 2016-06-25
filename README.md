@@ -11,10 +11,10 @@
   1. Для каждого семпла находим replication timing всех мутировавших
   нуклеотидов: bin/mutationReplicationTiming.py
   2. Для каждого семпла находим replication timing всех позиций
-  нуклеотидов, входящих в APOBEG мотив (MOTIFS = ['TCT', 'TCA']):
+  нуклеотидов, входящих в APOBEC мотив (MOTIFS = ['TCT', 'TCA']):
   bin/motifReplicationTiming.py
   3. Нормализуем количество мутаций с конкретным replication timing
-  на количество APOBEG-мотивов с тем же replication timing:
+  на количество APOBEC-мотивов с тем же replication timing:
   bin/normalizeResult.py
 * Исследуем зависимость наклона графика частоны мутаций от APOBEC-enrichment: bin/linearModel.R
   1. Строим линейную регрессию частоты APOGEC-мутаций от replication timing
@@ -30,4 +30,4 @@
 * [replication timing for IMR90](http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwRepliSeq/wgEncodeUwRepliSeqImr90WaveSignalRep1.bigWig "lung replication timing")
 * [replication timing for MCF-7](http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwRepliSeq/wgEncodeUwRepliSeqMcf7WaveSignalRep1.bigWig "breast replication timing")
 * [bigWigToWig](ftp://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/ "Преобразование .bigWig -> .wig")
-* [APOBEG enrichment](www.cell.com/cms/attachment/2040452923/2053963817/mmc2.xlsx "Степень влияния APOBEC на каждый из семплов")
+* [APOBEC enrichment](www.cell.com/cms/attachment/2040452923/2053963817/mmc2.xlsx "Степень влияния APOBEC на каждый из семплов")
