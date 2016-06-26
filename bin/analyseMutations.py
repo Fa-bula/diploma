@@ -14,7 +14,7 @@ ENRICHMENT_FILE = os.path.join(BREAST_DIR, 'enrichment')
 # Borders of bins, where we collect replication times
 BIN_START = [10 * i for i in range(9)]
 
-def calculateReplicationTiming(replicationTiming, position):
+def calculateReplicationTiming(replicationTimingSet, position):
     """ Linear approximation of replication time between two points
     with known replication time. Returns -1 if one of neighbour has no
     known replication time 
@@ -22,8 +22,8 @@ def calculateReplicationTiming(replicationTiming, position):
     and position
     out: linear approximation of replication timing in position"""
     if position % 1000 == 500:
-        if position in replicationTiming:
-            return replicationTiming[position]
+        if position in replicationTimingSet:
+            return replicationTimingSet[position]
         else:
             return -1
     floor = (position - position % 1000)
@@ -34,9 +34,9 @@ def calculateReplicationTiming(replicationTiming, position):
         leftNeighbour = floor - 500
         rightNeighbour = floor + 500
     
-    if leftNeighbour in replicationTiming and rightNeighbour in replicationTiming:
-        leftValue = replicationTiming[leftNeighbour]
-        rightValue = replicationTiming[rightNeighbour]
+    if leftNeighbour in replicationTimingSet and rightNeighbour in replicationTimingSet:
+        leftValue = replicationTimingSet[leftNeighbour]
+        rightValue = replicationTimingSet[rightNeighbour]
         return leftValue + 1.0 * (rightValue - leftValue) * (position - leftNeighbour) / 1000
     else:
         return -1
@@ -157,32 +157,3 @@ def splitToBins(points, binStart):
             numberOfPointsInBin[-1] += 1
 
     return numberOfPointsInBin
-
-
-if __name__ == '__main__':
-    DATA_DIR = os.path.join(BREAST_DIR, 'mutation_replication_time',
-                            'test')
-    OUTPUT_DIR = os.path.join(DATA_DIR, 'hist')
-    drawAllPlots(DATA_DIR, OUTPUT_DIR)
-
-    # replicationTimingSets = createRepTimingSets()
-    # OUTPUT_DIR = os.path.join(BREAST_DIR, 'genome_replication_time')
-    # motifRepTime = []
-
-    # for chromosome in GENOME_FILE_NAMES:
-    #     motifRepTime += getMotifRepTime(chromosome, replicationTimingSets)
-
-    # with open(os.path.join(OUTPUT_DIR, 'genome'), 'w') as outputFile:
-    #     for repTime in motifRepTime:
-    #         outputFile.write(str(repTime) + '\n')
-
-    # with open(os.path.join(HOME, 'breast_canser_data/enrichment')) as enrichment:
-    #     lines = enrichment.readlines()
-    # for line in lines:
-    #     # SAMPLE_NAME = 'PD3851a'
-    #     SAMPLE_NAME = line.split('\t')[0]
-    #     print('considering {0} sample...'.format(SAMPLE_NAME))
-    #     replicationTimings = getRepTime(MUTATION_FILE_NAME, GENOME_DIR, REP_TIME_FILE_NAME, SAMPLE_NAME)
-    #     with open(os.path.join(HOME, 'breast_canser_data/repTime of mutations', SAMPLE_NAME), 'w') as outputFile:
-    #         for time in replicationTimings:
-    #             outputFile.write("{0}\n".format(time))
