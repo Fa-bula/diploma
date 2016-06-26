@@ -7,9 +7,9 @@ import analyseMutations as am
 # by number of APOBEC-motifs in genome with this replication time
 # This way, we get estimation of probability of mutation
 # Writes to output file outDir/<sampleName>:
-# <replicationTiming>\t<mutationProbability> 
+# <replicationTiming>\t<mutationProbability>
 
-def normalizeResults(borders, normalizer, dataDir, outDir):
+def normalize_results(borders, normalizer, dataDir, outDir):
     """ Split data in bins, defined by borders list.
     Then divide numberOfPointsInBin[i] by normalizer[i]
     IN: borders - list of bin's borders,
@@ -19,7 +19,7 @@ def normalizeResults(borders, normalizer, dataDir, outDir):
         sys.exit("Length of normalizer ({0}) should be equal to\
         number of bins({1})".format(len(normalizer), len(borders) + 1))
 
-    dataFileNames = am.onlyFiles(dataDir)
+    dataFileNames = am.get_only_files(dataDir)
 
     for dataFileName in dataFileNames:
         points = []
@@ -27,7 +27,7 @@ def normalizeResults(borders, normalizer, dataDir, outDir):
             for line in dataFile:
                 points.append(float(line))
 
-        numberOfPointsInBin = am.splitToBins(points, borders)
+        numberOfPointsInBin = am.split_to_bins(points, borders)
         for i, normCoeff in enumerate(normalizer):
             numberOfPointsInBin[i] = numberOfPointsInBin[i] * 1.0 / normCoeff
         outFileName = os.path.join(outDir, os.path.basename(dataFileName))
@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     motifDir = sys.argv[1]
     normalizer = [0] * (len(am.BIN_START) + 1)
-    motifRepTimeFileList = am.onlyFiles(motifDir)
+    motifRepTimeFileList = am.get_only_files(motifDir)
     for fileName in motifRepTimeFileList:
         with open(fileName) as readFile:
             for i, line in enumerate(readFile):
@@ -57,4 +57,4 @@ if __name__ == '__main__':
 
     dataDir = sys.argv[2]
     outDir = sys.argv[3]
-    normalizeResults(am.BIN_START, normalizer, dataDir, outDir)
+    normalize_results(am.BIN_START, normalizer, dataDir, outDir)

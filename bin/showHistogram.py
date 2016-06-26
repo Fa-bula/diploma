@@ -4,7 +4,7 @@ import os
 import analyseMutations as am
 import sys
 
-def showHist(dataFile, outDir, ignoreValue):
+def show_histogram(dataFile, outDir, ignoreValue):
     """ Shows histogram of values, stored in file, ignoring some
     values, for example -1, because -1 is no replication timing """
     values = []
@@ -20,8 +20,8 @@ def showHist(dataFile, outDir, ignoreValue):
     return
 
 
-def drawAllPlots(dataDir, outputDir):
-    fileNames = am.onlyFiles(dataDir)
+def draw_all_plots(dataDir, outputDir):
+    fileNames = am.get_only_files(dataDir)
     for fileName in fileNames:
         y = []
         with open(fileName) as readFile:
@@ -41,14 +41,4 @@ if __name__ == '__main__':
     if len(sys.argv) != 3:
         sys.exit('Usage: {0} dataDir outDir'.format(sys.argv[0]))
 
-    drawAllPlots(sys.argv[1], sys.argv[2])
-    
-
-    
-# #!/bin/bash
-# ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
-# BIN=$ROOT/bin
-# DATA=$ROOT/breast_canser_data/mutation_replication_time
-# for file in $DATA/*; do
-#     $BIN/showHistogram.py $file
-# done
+    draw_all_plots(sys.argv[1], sys.argv[2])

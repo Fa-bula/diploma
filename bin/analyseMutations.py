@@ -14,10 +14,10 @@ ENRICHMENT_FILE = os.path.join(BREAST_DIR, 'enrichment')
 # Borders of bins, where we collect replication times
 BIN_START = [10 * i for i in range(9)]
 
-def calculateReplicationTiming(replicationTimingSet, position):
+def calculate_replication_timing(replicationTimingSet, position):
     """ Linear approximation of replication time between two points
     with known replication time. Returns -1 if one of neighbour has no
-    known replication time 
+    known replication time
     in: dictionary with replication timings in positions 500, 1500, 2500,..
     and position
     out: linear approximation of replication timing in position"""
@@ -42,7 +42,7 @@ def calculateReplicationTiming(replicationTimingSet, position):
         return -1
 
 
-def getGenomeFileNames(genomeDir):
+def get_genome_file_names(genomeDir):
     """ in: directory with genome sequence files by chromosomes
     out: a dictionary, where genomeFileNames[chrNum] = full/path/to/seq/file """
     genomeFileNames = {}
@@ -53,9 +53,9 @@ def getGenomeFileNames(genomeDir):
     return genomeFileNames
 
 
-GENOME_FILE_NAMES = getGenomeFileNames(GENOME_DIR)
+GENOME_FILE_NAMES = get_genome_file_names(GENOME_DIR)
 
-def createRepTimingSets():
+def create_rep_time_sets():
     """ out: dict with data from replication timing file with format:
     replicationTimingSets[chromosome][position] = replicationTiming"""
     replicationTimingSets = {}
@@ -75,7 +75,7 @@ def createRepTimingSets():
     return replicationTimingSets
 
 
-def getRepTime(mutationFileName, sampleName, replicationTimingSets):
+def get_mutation_rep_time(mutationFileName, sampleName, replicationTimingSets):
     """ Returns list with replication timings of mutated nucleotides with
     given sample name, mutation motif and final nucleotide """
 
@@ -97,7 +97,7 @@ def getRepTime(mutationFileName, sampleName, replicationTimingSets):
                     sys.exit('chromosome {0} position {1} nucl malfolmed')
                 motif = genome[position - 2: position + 1]
                 if motif in MOTIFS and mutation['finalNucl'] in FINAL_NUCL and mutation['sampleName'] == sampleName:
-                    replicationTiming = calculateReplicationTiming(replicationTimingSets[chromosome], position)
+                    replicationTiming = calculate_replication_timing(replicationTimingSets[chromosome], position)
                     if replicationTiming == -1:
                         print('uncalculatable replication time at {0}:{1}'.format(chromosome, position))
                     apobegMutationReplicationTimings.append(replicationTiming)
@@ -106,20 +106,20 @@ def getRepTime(mutationFileName, sampleName, replicationTimingSets):
     return apobegMutationReplicationTimings
 
 
-def getMotifRepTime(replicationTimingSets, chromosome):
+def get_motif_rep_time(replicationTimingSets, chromosome):
     """ Returns list of replication timings of positions in genome
     with particular motif and given chromosome """
     motifRepTimings = []
    
     with open(GENOME_FILE_NAMES[chromosome], 'r') as genomeFile:
-            genome = genomeFile.read()
+        genome = genomeFile.read()
     for motif in MOTIFS:
         # First occurence of beginning of motif
         firstOccurrence = genome.find(motif, 0)
         while firstOccurrence >= 0:
             # One +1 because str.find finds start of motif, but we want center
             # Second +1 because str begins with 0th element
-            replicationTiming = calculateReplicationTiming(replicationTimingSets[chromosome],
+            replicationTiming = calculate_replication_timing(replicationTimingSets[chromosome],
                                                            firstOccurrence + 2)
             if replicationTiming == -1:
                 print('uncalculatable replication time at {0}:{1}'.format(chromosome, firstOccurrence + 2))
@@ -128,22 +128,22 @@ def getMotifRepTime(replicationTimingSets, chromosome):
     return motifRepTimings
 
 
-def onlyFiles(directory):
+def get_only_files(directory):
     """ Returns list of full paths of files in directory """
     return [os.path.join(directory, f) for f in os.listdir(directory)
             if os.path.isfile(os.path.join(directory, f))]
 
 
-def getSampleNames():
+def get_sample_names():
     """ out: list of sample names from enrichment file """
-    sampleNames =[]
+    sampleNames = []
     with open(ENRICHMENT_FILE, 'r') as enrichmentFile:
         for line in enrichmentFile:
             sampleNames.append(line.split('\t')[0])
     return sampleNames
 
 
-def splitToBins(points, binStart):
+def split_to_bins(points, binStart):
     """ Splits points to bins, defined by binStart list:
     (-inf, binStart[0]), [binStart[0], binStart[1]), [binStart[1], inf)
     Returns number of points in each bin """

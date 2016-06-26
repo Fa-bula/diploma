@@ -12,12 +12,12 @@ if __name__ == '__main__':
                                              "enrichment.txt",
                                              "out_Directory"))
         sys.exit()
-    
-    replicationTimingSets = am.createRepTimingSets()
-    sampleNames = am.getSampleNames()
-    
+
+    replicationTimingSets = am.create_rep_time_sets()
+    sampleNames = am.get_sample_names()
+
     for sampleName in sampleNames:
-        mutationReplicationTiming = am.getRepTime(sys.argv[1], sampleName,
+        mutationReplicationTiming = am.get_mutation_rep_time(sys.argv[1], sampleName,
                                                   replicationTimingSets)
 
         outFileName = os.path.join(sys.argv[3], sampleName)
