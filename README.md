@@ -21,6 +21,7 @@
   и для каждого семпла сохраняем коэффициент наклона регрессионной прямой
   2. Строим линейную регрессию коэффициента наклона, найденного в предыдущем
   пункте от APOBEC-enrichment
+
 Полезные ссылки (ссылки на ftp гитхаб не отображает, но их можно посмотреть в [сыром виде этого файла](https://raw.githubusercontent.com/Fa-bula/diploma/master/README.md?token=AJHajQHKS2BXy2uASf3yPNw8L5Hnk6dVks5XaFz1wA%3D%3D)):
 * [Breast canser mutations](ftp://ftp.sanger.ac.uk/pub/cancer/AlexandrovEtAl/somatic_mutation_data/Breast/Breast_clean_somatic_mutations_for_signature_analysis_apr15.txt)
 * [Breast catalog](ftp://ftp.sanger.ac.uk/pub/cancer/AlexandrovEtAl/mutational_catalogs/genomes/Breast/Breast_genomes_mutational_catalog_192_subs_with_strand_bias.txt "Список геномных семплов")
