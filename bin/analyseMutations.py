@@ -2,7 +2,6 @@
 """ This module include basic functions to work with mutations"""
 import sys
 import os
-import readMutations as rm
 MOTIFS = ['TCT', 'TCA']         # initial motif
 FINAL_NUCL = ['G', 'T']         # final nucleotide
 
@@ -14,6 +13,37 @@ REP_TIME_FILE = os.path.join(BREAST_DIR, 'replicationTiming')
 ENRICHMENT_FILE = os.path.join(BREAST_DIR, 'enrichment')
 # Borders of bins, where we collect replication times
 BIN_START = [10 * i for i in range(9)]
+
+
+def read_mutations(mutationsFileName, mutationType='', sampleNames=''):
+    """ in: file with mutations, maybe specified type of mutation and set of sample names
+    out: list of mutations with given mutationType, every item in list is dictionary """
+
+    with open(mutationsFileName) as mutationsFile:
+        lines = mutationsFile.readlines()
+
+    allMutations = []
+    for line in lines:
+        splittedLine = line.split('\t')
+        if mutationType != '' and mutationType != splittedLine[1]:
+            continue
+
+        if sampleNames != '' and splittedLine[0] not in sampleNames:
+            continue
+        
+        mutation = {}
+        mutation['sampleName'] = splittedLine[0]
+        mutation['mutationType'] = splittedLine[1]
+        mutation['chromosome'] = splittedLine[2]
+        mutation['positionFrom'] = int(splittedLine[3])
+        mutation['positionTo'] = int(splittedLine[4])
+        mutation['initialNucl'] = splittedLine[5]
+        mutation['finalNucl'] = splittedLine[6]
+        mutation['info'] = splittedLine[7]
+        allMutations.append(mutation)
+
+    return allMutations
+
 
 def calculate_replication_timing(replication_timing_set, position):
     """ Linear approximation of replication time between two points
@@ -80,7 +110,7 @@ def get_mutation_rep_time(mutationFileName, sampleName, replication_timing_sets)
     """ Returns list with replication timings of mutated nucleotides with
     given sample name, mutation motif and final nucleotide """
 
-    allMutations = rm.readMutations(mutationFileName, 'subs', sampleName)
+    allMutations = read_mutations(mutationFileName, 'subs', sampleName)
     apobegMutationReplicationTimings = []
 
     # We consider chromosomes separately to avoid memory overflow:
@@ -136,3 +166,4 @@ def split_to_bins(points, binStart):
             numberOfPointsInBin[-1] += 1
 
     return numberOfPointsInBin
+

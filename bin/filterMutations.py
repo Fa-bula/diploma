@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import sys
-import readMutations as rm
+import analyseMutations as am
 # remove indel mutations and exsome samples from mutations file
 
 
@@ -13,7 +13,7 @@ def filterMutations(mutationsFileName, catalogFileName, outFileName):
         genomeSampleNames = catalogFile.readline()[:-1].split('\t')
         genomeSampleNames.pop(0) # First and second words are "Mutation type"
 
-    mutations = rm.readMutations(mutationsFileName, mutationType='subs',
+    mutations = am.read_mutations(mutationsFileName, mutationType='subs',
                              sampleNames=genomeSampleNames)
     with open(outFileName, "w") as outputFile:
         for  mutation in mutations:
