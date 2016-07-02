@@ -13,8 +13,9 @@
   2. Для каждого семпла находим replication timing всех позиций
   нуклеотидов, входящих в APOBEC мотив (MOTIFS = ['TCT', 'TCA']):
   bin/motifReplicationTiming.py
-  3. Нормализуем количество мутаций с конкретным replication timing
-  на количество APOBEC-мотивов с тем же replication timing:
+  3. Делим весь интервал значений replication timing на несколько бинов.
+  (BIN_START = [10 * i for i in range(9)]). Затем, вычисляем частоту мутаций
+  в каждом бине (Делим количество мутаций в бине на количество APOBEC-мотивов):
   bin/normalizeResult.py
 * Исследуем зависимость наклона графика частоны мутаций от APOBEC-enrichment: bin/linearModel.R
   1. Строим линейную регрессию частоты APOGEC-мутаций от replication timing
