@@ -13,12 +13,12 @@ if __name__ == '__main__':
                                              "out_Directory"))
         sys.exit()
 
-    replicationTimingSets = am.create_rep_time_sets()
+    replication_timing_sets = am.create_rep_time_sets()
     sampleNames = am.get_sample_names()
 
     for sampleName in sampleNames:
         mutationReplicationTiming = am.get_mutation_rep_time(sys.argv[1], sampleName,
-                                                  replicationTimingSets)
+                                                  replication_timing_sets)
 
         outFileName = os.path.join(sys.argv[3], sampleName)
         with open(outFileName, 'w') as outFile:
