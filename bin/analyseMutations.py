@@ -1,4 +1,5 @@
 #!/usr/bin/python
+""" This module include basic functions to work with mutations"""
 import sys
 import os
 import readMutations as rm
@@ -14,7 +15,7 @@ ENRICHMENT_FILE = os.path.join(BREAST_DIR, 'enrichment')
 # Borders of bins, where we collect replication times
 BIN_START = [10 * i for i in range(9)]
 
-def calculate_replication_timing(replicationTimingSet, position):
+def calculate_replication_timing(replication_timing_set, position):
     """ Linear approximation of replication time between two points
     with known replication time. Returns -1 if one of neighbour has no
     known replication time
@@ -22,8 +23,8 @@ def calculate_replication_timing(replicationTimingSet, position):
     and position
     out: linear approximation of replication timing in position"""
     if position % 1000 == 500:
-        if position in replicationTimingSet:
-            return replicationTimingSet[position]
+        if position in replication_timing_set:
+            return replication_timing_set[position]
         else:
             return -1
     floor = (position - position % 1000)
@@ -34,9 +35,9 @@ def calculate_replication_timing(replicationTimingSet, position):
         leftNeighbour = floor - 500
         rightNeighbour = floor + 500
     
-    if leftNeighbour in replicationTimingSet and rightNeighbour in replicationTimingSet:
-        leftValue = replicationTimingSet[leftNeighbour]
-        rightValue = replicationTimingSet[rightNeighbour]
+    if leftNeighbour in replication_timing_set and rightNeighbour in replication_timing_set:
+        leftValue = replication_timing_set[leftNeighbour]
+        rightValue = replication_timing_set[rightNeighbour]
         return leftValue + 1.0 * (rightValue - leftValue) * (position - leftNeighbour) / 1000
     else:
         return -1
@@ -57,11 +58,11 @@ GENOME_FILE_NAMES = get_genome_file_names(GENOME_DIR)
 
 def create_rep_time_sets():
     """ out: dict with data from replication timing file with format:
-    replicationTimingSets[chromosome][position] = replicationTiming"""
-    replicationTimingSets = {}
+    replication_timing_sets[chromosome][position] = replicationTiming"""
+    replication_timing_sets = {}
     # GENOME_FILE_NAMES[chromosome] = '/path/to/genome/'
     for chromosome in GENOME_FILE_NAMES:
-        replicationTimingSets[chromosome] = {}
+        replication_timing_sets[chromosome] = {}
 
     with open(REP_TIME_FILE) as readFile:
         lines = readFile.readlines()
@@ -70,12 +71,12 @@ def create_rep_time_sets():
             chromosome = splittedLine[0]
             position = int(splittedLine[1])
             replicationTiming = float(splittedLine[2])
-            replicationTimingSets[chromosome][position] = replicationTiming
+            replication_timing_sets[chromosome][position] = replicationTiming
 
-    return replicationTimingSets
+    return replication_timing_sets
 
 
-def get_mutation_rep_time(mutationFileName, sampleName, replicationTimingSets):
+def get_mutation_rep_time(mutationFileName, sampleName, replication_timing_sets):
     """ Returns list with replication timings of mutated nucleotides with
     given sample name, mutation motif and final nucleotide """
 
@@ -97,35 +98,13 @@ def get_mutation_rep_time(mutationFileName, sampleName, replicationTimingSets):
                     sys.exit('chromosome {0} position {1} nucl malfolmed')
                 motif = genome[position - 2: position + 1]
                 if motif in MOTIFS and mutation['finalNucl'] in FINAL_NUCL and mutation['sampleName'] == sampleName:
-                    replicationTiming = calculate_replication_timing(replicationTimingSets[chromosome], position)
+                    replicationTiming = calculate_replication_timing(replication_timing_sets[chromosome], position)
                     if replicationTiming == -1:
                         print('uncalculatable replication time at {0}:{1}'.format(chromosome, position))
                     apobegMutationReplicationTimings.append(replicationTiming)
         del genome
 
     return apobegMutationReplicationTimings
-
-
-def get_motif_rep_time(replicationTimingSets, chromosome):
-    """ Returns list of replication timings of positions in genome
-    with particular motif and given chromosome """
-    motifRepTimings = []
-   
-    with open(GENOME_FILE_NAMES[chromosome], 'r') as genomeFile:
-        genome = genomeFile.read()
-    for motif in MOTIFS:
-        # First occurence of beginning of motif
-        firstOccurrence = genome.find(motif, 0)
-        while firstOccurrence >= 0:
-            # One +1 because str.find finds start of motif, but we want center
-            # Second +1 because str begins with 0th element
-            replicationTiming = calculate_replication_timing(replicationTimingSets[chromosome],
-                                                           firstOccurrence + 2)
-            if replicationTiming == -1:
-                print('uncalculatable replication time at {0}:{1}'.format(chromosome, firstOccurrence + 2))
-            motifRepTimings.append(replicationTiming)
-            firstOccurrence = genome.find(motif, firstOccurrence + 1)
-    return motifRepTimings
 
 
 def get_only_files(directory):
