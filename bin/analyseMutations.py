@@ -2,6 +2,7 @@
 """ This module include basic functions to work with mutations"""
 import sys
 import os
+import pandas
 MOTIFS = ['TCT', 'TCA']         # initial motif
 FINAL_NUCL = ['G', 'T']         # final nucleotide
 
@@ -15,34 +16,22 @@ ENRICHMENT_FILE = os.path.join(BREAST_DIR, 'enrichment')
 BIN_START = [10 * i for i in range(9)]
 
 
-def read_mutations(mutationsFileName, mutationType='', sampleNames=''):
-    """ in: file with mutations, maybe specified type of mutation and set of sample names
-    out: list of mutations with given mutationType, every item in list is dictionary """
-
-    with open(mutationsFileName) as mutationsFile:
-        lines = mutationsFile.readlines()
-
-    allMutations = []
-    for line in lines:
-        splittedLine = line.split('\t')
-        if mutationType != '' and mutationType != splittedLine[1]:
-            continue
-
-        if sampleNames != '' and splittedLine[0] not in sampleNames:
-            continue
-        
-        mutation = {}
-        mutation['sampleName'] = splittedLine[0]
-        mutation['mutationType'] = splittedLine[1]
-        mutation['chromosome'] = splittedLine[2]
-        mutation['positionFrom'] = int(splittedLine[3])
-        mutation['positionTo'] = int(splittedLine[4])
-        mutation['initialNucl'] = splittedLine[5]
-        mutation['finalNucl'] = splittedLine[6]
-        mutation['info'] = splittedLine[7]
-        allMutations.append(mutation)
-
-    return allMutations
+def read_mutations(mutations_file, mutation_type='', sample_names=''):
+    """ Reads mutation from mutations_file with given mutation_type
+    and sample in sample_names. Returns list of mutations, every item
+    in list is dictionary, describing individual mutation"""
+    column_names = ['sampleName', 'mutationType', 'chromosome',
+                    'positionFrom', 'positionTo', 'initialNucl',
+                    'finalNucl', 'info']
+    mutations = pandas.read_csv(mutations_file, sep="\t", header=None,
+                           names=column_names, index_col=False)
+    if mutation_type:
+        mask = mutations['mutationType'] == mutation_type
+        mutations = mutations[mask]
+    if sample_names:
+        mask = mutations.isin(sample_names)['sampleName']
+        mutations = mutations[mask]
+    return mutations
 
 
 def calculate_replication_timing(replication_timing_set, position):
@@ -97,10 +86,10 @@ def create_rep_time_sets():
     with open(REP_TIME_FILE) as readFile:
         lines = readFile.readlines()
         for line in lines:
-            splittedLine = line.split(' ')
-            chromosome = splittedLine[0]
-            position = int(splittedLine[1])
-            replicationTiming = float(splittedLine[2])
+            splitted_line = line.split(' ')
+            chromosome = splitted_line[0]
+            position = int(splitted_line[1])
+            replicationTiming = float(splitted_line[2])
             replication_timing_sets[chromosome][position] = replicationTiming
 
     return replication_timing_sets
@@ -145,11 +134,11 @@ def get_only_files(directory):
 
 def get_sample_names():
     """ out: list of sample names from enrichment file """
-    sampleNames = []
+    sample_names = []
     with open(ENRICHMENT_FILE, 'r') as enrichmentFile:
         for line in enrichmentFile:
-            sampleNames.append(line.split('\t')[0])
-    return sampleNames
+            sample_names.append(line.split('\t')[0])
+    return sample_names
 
 
 def split_to_bins(points, binStart):
