@@ -5,6 +5,18 @@ import analyseMutations as am
 import sys
 import os
 
+
+def get_sample_names(enrichment_file):
+    """ out: list of sample names from enrichment file """
+    sample_names = []
+    with open(enrichment_file, 'r') as input_file:
+        next(input_file)        # Ignoring header
+        for line in input_file:
+            if line.split('\t')[0] != "\n":
+                sample_names.append(line.split('\t')[0])
+    return sample_names
+
+
 def get_mutation_rep_time(mutation_file, sample_name):
     """ Returns list with replication timings of mutated nucleotides
     with given sample name, mutation motif and final nucleotide"""
@@ -41,7 +53,7 @@ if __name__ == '__main__':
     if len(sys.argv) != 4:
         sys.exit("Usage {0} mutations enrichment outDir".format(sys.argv[0]))
 
-    sample_names = am.get_sample_names()
+    sample_names = get_sample_names(sys.argv[2])
     for sample in sample_names:
         result = get_mutation_rep_time(sys.argv[1], sample)
         outFileName = os.path.join(sys.argv[3], sample)
