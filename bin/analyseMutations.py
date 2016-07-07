@@ -6,11 +6,9 @@ MOTIFS = ['TCT', 'TCA']         # initial motif
 FINAL_NUCL = ['G', 'T']         # final nucleotide
 
 HOME = '/home/bulat/diploma/'
-MUTATION_FILE = os.path.join(HOME, 'breast_canser_data/mutations')
 GENOME_DIR = os.path.join(HOME, 'genome/seq')
 BREAST_DIR = os.path.join(HOME, 'breast_canser_data')
 REP_TIME_FILE = os.path.join(BREAST_DIR, 'replicationTiming')
-ENRICHMENT_FILE = os.path.join(BREAST_DIR, 'enrichment')
 # Borders of bins, where we collect replication times
 BIN_START = [10 * i for i in range(9)]
 
@@ -105,17 +103,6 @@ def get_only_files(directory):
     """ Returns list of full paths of files in directory """
     return [os.path.join(directory, f) for f in os.listdir(directory)
             if os.path.isfile(os.path.join(directory, f))]
-
-
-def get_sample_names():
-    """ out: list of sample names from enrichment file """
-    sample_names = []
-    with open(ENRICHMENT_FILE, 'r') as input_file:
-        next(input_file)        # Ignoring header
-        for line in input_file:
-            if line.split('\t')[0] != "\n":
-                sample_names.append(line.split('\t')[0])
-    return sample_names
 
 
 def split_to_bins(points, bin_start):
