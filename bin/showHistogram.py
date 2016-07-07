@@ -1,4 +1,5 @@
 #!/usr/bin/python
+""" Showing different charts and histograms of data"""
 import matplotlib.pyplot as plt
 import os
 import analyseMutations as am
@@ -10,13 +11,13 @@ def show_histogram(dataFile, outDir, ignoreValue):
     values = []
     with open(dataFile, 'r') as readFile:
         for line in readFile:
-            currentValue = float(line)
-            if currentValue != ignoreValue:
-                values.append(currentValue)
+            current_val = float(line)
+            if current_val != ignoreValue:
+                values.append(current_val)
 
     plt.hist(values)
-    outFileName = os.path.join(outDir, os.path.basename(dataFile) + '.png')
-    plt.savefig(outFileName)
+    out_file_name = os.path.join(outDir, os.path.basename(dataFile) + '.png')
+    plt.savefig(out_file_name)
     return
 
 

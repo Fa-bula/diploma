@@ -1,13 +1,13 @@
 #!/usr/bin/python
+""" Removes indel mutations and exsome samples from mutations file"""
 import sys
 import analyseMutations as am
-# remove indel mutations and exsome samples from mutations file
 
 
-def filterMutations(mutations_file, catalogFileName, outFileName):
+def filterMutations(mutations_file, catalogFileName, out_file):
     """ in: file with mutations; catalog with list of genome samples
     out: writes all mutations (exclude indel mutations and exome samples)
-    to out file, specified by outFileName; returns nothing """
+    to out file, specified by out_file; returns nothing """
     genomeSampleNames = []      # all samples except exome samples
     with open(catalogFileName) as catalogFile:
         genomeSampleNames = catalogFile.readline()[:-1].split('\t')
@@ -15,7 +15,7 @@ def filterMutations(mutations_file, catalogFileName, outFileName):
 
     mutations = am.read_mutations(mutations_file, mutation_type='subs',
                                   sample_names=genomeSampleNames)
-    mutations.to_csv(outFileName, sep='\t', header=False, index=False)
+    mutations.to_csv(out_file, sep='\t', header=False, index=False)
     return
 
 

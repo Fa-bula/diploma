@@ -8,7 +8,6 @@ import analyseMutations as am
 from operator import add
 
 
-
 def calculate_frequency(bin_borders, attempts_in_bin, event_positions):
     """ Calculates frequency of events in bin[i]
     IN: bin_borders - list of bin's borders,
@@ -32,8 +31,7 @@ def estimate_conditional_probability(bin_borders, event_positions):
     conditional_probability = [0] * len(events_in_bin)
     number_of_events = sum(events_in_bin)
     for i in range(len(events_in_bin)):
-        conditional_probability[i] = 1.0 * events_in_bin[i] / number_of_events
-
+        conditional_probability[i] = events_in_bin[i] / number_of_events
     return conditional_probability
 
 
