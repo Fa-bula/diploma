@@ -1,6 +1,5 @@
 #!/usr/bin/python
 """ This module include basic functions to work with mutations"""
-import sys
 import os
 import pandas
 MOTIFS = ['TCT', 'TCA']         # initial motif
@@ -16,10 +15,12 @@ ENRICHMENT_FILE = os.path.join(BREAST_DIR, 'enrichment')
 BIN_START = [10 * i for i in range(9)]
 
 
-def read_mutations(mutations_file, mutation_type='', sample_names=''):
-    """ Reads mutation from mutations_file with given mutation_type
-    and sample in sample_names. Returns list of mutations, every item
-    in list is dictionary, describing individual mutation"""
+def read_mutations(mutations_file, mutation_type='', chromosome='',\
+                   sample_names='', final_nucleotides=''):
+    """ Reads mutation from mutations_file with given mutation_type,
+    final nucleotide in final_nucl and sample in sample_names.
+    Returns list of mutations, every item in list is dictionary,
+    describing individual mutation"""
     column_names = ['sampleName', 'mutationType', 'chromosome',
                     'positionFrom', 'positionTo', 'initialNucl',
                     'finalNucl', 'info']
@@ -28,102 +29,76 @@ def read_mutations(mutations_file, mutation_type='', sample_names=''):
     if mutation_type:
         mask = mutations['mutationType'] == mutation_type
         mutations = mutations[mask]
+    if chromosome:
+        mask = mutations['chromosome'] == chromosome
+        mutations = mutations[mask]
     if sample_names:
         mask = mutations.isin(sample_names)['sampleName']
+        mutations = mutations[mask]
+    if final_nucleotides:
+        mask = mutations.isin(final_nucleotides)['finalNucl']
         mutations = mutations[mask]
     return mutations
 
 
-def calculate_replication_timing(replication_timing_set, position):
-    """ Linear approximation of replication time between two points
-    with known replication time. Returns -1 if one of neighbour has no
-    known replication time
-    in: dictionary with replication timings in positions 500, 1500, 2500,..
-    and position
-    out: linear approximation of replication timing in position"""
-    if position % 1000 == 500:
-        if position in replication_timing_set:
-            return replication_timing_set[position]
-        else:
-            return -1
-    floor = (position - position % 1000)
-    if position % 1000 > 500:
-        leftNeighbour = floor + 500
-        rightNeighbour = floor + 1500
-    else:
-        leftNeighbour = floor - 500
-        rightNeighbour = floor + 500
-    
-    if leftNeighbour in replication_timing_set and rightNeighbour in replication_timing_set:
-        leftValue = replication_timing_set[leftNeighbour]
-        rightValue = replication_timing_set[rightNeighbour]
-        return leftValue + 1.0 * (rightValue - leftValue) * (position - leftNeighbour) / 1000
-    else:
-        return -1
 
-
-def get_genome_file_names(genomeDir):
+def get_genome_file_names(genome_dir):
     """ in: directory with genome sequence files by chromosomes
-    out: a dictionary, where genomeFileNames[chrNum] = full/path/to/seq/file """
-    genomeFileNames = {}
-    for name in os.listdir(genomeDir):
-        fullPath = os.path.join(genomeDir, name)
-        if os.path.isfile(fullPath):
-            genomeFileNames[name[20:]] = fullPath
-    return genomeFileNames
+    out: a dictionary genome_file_names[chrNum] = full/path/to/seq/file"""
+    genome_file_names = {}
+    for name in os.listdir(genome_dir):
+        full_path = os.path.join(genome_dir, name)
+        if os.path.isfile(full_path):
+            genome_file_names[name[20:]] = full_path
+    return genome_file_names
 
 
 GENOME_FILE_NAMES = get_genome_file_names(GENOME_DIR)
 
-def create_rep_time_sets():
-    """ out: dict with data from replication timing file with format:
-    replication_timing_sets[chromosome][position] = replicationTiming"""
-    replication_timing_sets = {}
+def create_rep_time_set():
+    """ returns dict with data from replication timing file
+    replication_timing_sets[chromosome] = pandas.DataFrame('position',
+    'replication_timing')"""
+    data = pandas.read_csv(REP_TIME_FILE, sep=' ', dtype={'chromosome': str})
+    replication_timing_set = {}
     # GENOME_FILE_NAMES[chromosome] = '/path/to/genome/'
     for chromosome in GENOME_FILE_NAMES:
-        replication_timing_sets[chromosome] = {}
+        mask = data.chromosome == chromosome
+        replication_timing_set[chromosome] = data[mask]
+        del replication_timing_set[chromosome]['chromosome']
+        replication_timing_set[chromosome].set_index('position',
+                                                       inplace=True)
+    return replication_timing_set
 
-    with open(REP_TIME_FILE) as readFile:
-        lines = readFile.readlines()
-        for line in lines:
-            splitted_line = line.split(' ')
-            chromosome = splitted_line[0]
-            position = int(splitted_line[1])
-            replicationTiming = float(splitted_line[2])
-            replication_timing_sets[chromosome][position] = replicationTiming
-
-    return replication_timing_sets
+REP_TIME_SET = create_rep_time_set()
 
 
-def get_mutation_rep_time(mutationFileName, sampleName, replication_timing_sets):
-    """ Returns list with replication timings of mutated nucleotides with
-    given sample name, mutation motif and final nucleotide """
+def calculate_replication_timing(chromosome, position):
+    """ Linear approximation of replication time between two points
+    with known replication time. Returns -1 if one of neighbour has no
+    known replication time
+    in: chromosome number and position in this chromosome
+    out: linear approximation of replication timing"""
+    rep_time_frame = REP_TIME_SET[chromosome]
+    if position in rep_time_frame.index:
+        return rep_time_frame.ix[position]
 
-    allMutations = read_mutations(mutationFileName, 'subs', sampleName)
-    apobegMutationReplicationTimings = []
+    floor = (position - position % 1000)
+    if position % 1000 > 500:
+        left_neighbour = floor + 500
+        right_neighbour = floor + 1500
+    else:
+        left_neighbour = floor - 500
+        right_neighbour = floor + 500
 
-    # We consider chromosomes separately to avoid memory overflow:
-    # All genome in str format ~ 3.1 GB - too much for RAM in my PC
-    for chromosome in GENOME_FILE_NAMES:
-        print('Considering chromosome #{0}...'.format(chromosome))
-        with open(GENOME_FILE_NAMES[chromosome], 'r') as genomeFile:
-            genome = genomeFile.read()
+    if left_neighbour not in rep_time_frame.index or \
+       right_neighbour not in rep_time_frame.index:
+        return -1
 
-        for mutation in allMutations:
-            # FIXME: Considering allMutation 20 times - unefficient
-            if mutation['chromosome'] == chromosome:
-                position = mutation['positionFrom']
-                if genome[position - 1] != mutation['initialNucl']:
-                    sys.exit('chromosome {0} position {1} nucl malfolmed')
-                motif = genome[position - 2: position + 1]
-                if motif in MOTIFS and mutation['finalNucl'] in FINAL_NUCL and mutation['sampleName'] == sampleName:
-                    replicationTiming = calculate_replication_timing(replication_timing_sets[chromosome], position)
-                    if replicationTiming == -1:
-                        print('uncalculatable replication time at {0}:{1}'.format(chromosome, position))
-                    apobegMutationReplicationTimings.append(replicationTiming)
-        del genome
-
-    return apobegMutationReplicationTimings
+    left_value = rep_time_frame[left_neighbour]
+    right_value = rep_time_frame[right_neighbour]
+    return left_value + 1.0 * (right_value - left_value) * \
+        (position - left_neighbour) / 1000
 
 
 def get_only_files(directory):
@@ -135,24 +110,25 @@ def get_only_files(directory):
 def get_sample_names():
     """ out: list of sample names from enrichment file """
     sample_names = []
-    with open(ENRICHMENT_FILE, 'r') as enrichmentFile:
-        for line in enrichmentFile:
-            sample_names.append(line.split('\t')[0])
+    with open(ENRICHMENT_FILE, 'r') as input_file:
+        next(input_file)        # Ignoring header
+        for line in input_file:
+            if line.split('\t')[0] != "\n":
+                sample_names.append(line.split('\t')[0])
     return sample_names
 
 
-def split_to_bins(points, binStart):
-    """ Splits points to bins, defined by binStart list:
-    (-inf, binStart[0]), [binStart[0], binStart[1]), [binStart[1], inf)
+def split_to_bins(points, bin_start):
+    """ Splits points to bins, defined by bin_start list:
+    (-inf, bin_start[0]), [bin_start[0], bin_start[1]), [bin_start[1], inf)
     Returns number of points in each bin """
-    numberOfPointsInBin = [0] * (len(binStart) + 1)
+    number_of_points_in_bin = [0] * (len(bin_start) + 1)
     for point in points:
-        for i, start in enumerate(binStart):
+        for i, start in enumerate(bin_start):
             if point < start:
-                numberOfPointsInBin[i] += 1
+                number_of_points_in_bin[i] += 1
                 break
-        if point >= binStart[-1]:
-            numberOfPointsInBin[-1] += 1
+        if point >= bin_start[-1]:
+            number_of_points_in_bin[-1] += 1
 
-    return numberOfPointsInBin
-
+    return number_of_points_in_bin
