@@ -3,7 +3,7 @@
 Genome sequence files should be named like "hs_ref_GRCh37.p5_chr1" """
 import sys
 import os
-import analyseMutations as am
+import core
 
 def check_chromosome(genome_file, mutations_file, chromosome):
     """Checks is (initialNucleotide, position) in mutations_file
@@ -11,7 +11,7 @@ def check_chromosome(genome_file, mutations_file, chromosome):
     with open(genome_file, 'r') as f:
         genome_sequence = f.read()
 
-    mutations_list = am.read_mutations(mutations_file,
+    mutations_list = core.read_mutations(mutations_file,
                                        mutation_type='subs',
                                        chromosome=chromosome)
     for index, mutation in mutations_list.iterrows():
@@ -31,7 +31,7 @@ def check_chromosome(genome_file, mutations_file, chromosome):
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         sys.exit("Usage: {0} mutations genomeDir".format(sys.argv[0]))
-    genome_files = am.get_only_files(sys.argv[2])
+    genome_files = core.get_only_files(sys.argv[2])
     for file_name in genome_files:
         chromosome = os.path.basename(file_name)[20:]
         check_chromosome(file_name, sys.argv[1], chromosome)

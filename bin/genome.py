@@ -3,7 +3,7 @@
 nucleotides and writes it to output directory"""
 import sys
 import os
-import analyseMutations as am
+import core
 
 def transform_fa(fa_file):
     """ Transforms .fa file to sequence of nucleotides"""
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     if len(sys.argv) != 3:
         sys.exit("Usage: {0} faFilesDir outDir".format(sys.argv[0]))
 
-    fa_files = am.get_only_files(sys.argv[1])
+    fa_files = core.get_only_files(sys.argv[1])
     for file_name in fa_files:
         out_file_name = os.path.join(sys.argv[2],
                                    os.path.basename(file_name)[:-3])

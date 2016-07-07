@@ -2,7 +2,7 @@
 """ Showing different charts and histograms of data"""
 import matplotlib.pyplot as plt
 import os
-import analyseMutations as am
+import core
 import sys
 
 def show_histogram(dataFile, outDir, ignoreValue):
@@ -22,7 +22,7 @@ def show_histogram(dataFile, outDir, ignoreValue):
 
 
 def draw_all_plots(dataDir, outputDir):
-    fileNames = am.get_only_files(dataDir)
+    fileNames = core.get_only_files(dataDir)
     for fileName in fileNames:
         y = []
         with open(fileName) as readFile:
