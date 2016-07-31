@@ -79,7 +79,7 @@ def calculate_replication_timing(chromosome, position):
     out: linear approximation of replication timing"""
     rep_time_frame = REP_TIME_SET[chromosome]
     if position in rep_time_frame.index:
-        return rep_time_frame.ix[position]
+        return float(rep_time_frame.ix[position])
 
     floor = (position - position % 1000)
     if position % 1000 > 500:
@@ -93,8 +93,8 @@ def calculate_replication_timing(chromosome, position):
        right_neighbour not in rep_time_frame.index:
         return -1
 
-    left_value = rep_time_frame[left_neighbour]
-    right_value = rep_time_frame[right_neighbour]
+    left_value = float(rep_time_frame.ix[left_neighbour])
+    right_value = float(rep_time_frame.ix[right_neighbour])
     return left_value + 1.0 * (right_value - left_value) * \
         (position - left_neighbour) / 1000
 
