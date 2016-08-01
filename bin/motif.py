@@ -9,8 +9,8 @@ def get_motif_rep_time(chromosome):
     """ Returns list of replication timings of positions in genome
     with particular motif and given chromosome"""
     motif_rep_time = []
-
-    with open(core.GENOME_FILE_NAMES[chromosome], 'r') as f:
+    genome_file_names = core.get_genome_file_names()
+    with open(genome_file_names[chromosome], 'r') as f:
         genome = f.read()
     for motif in core.MOTIFS:
         # First occurence of beginning of motif
@@ -32,7 +32,8 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         print "Usage {0} {1}".format(sys.argv[0], "out_directory")
         sys.exit()
-    for chromosome in core.GENOME_FILE_NAMES:
+    genome_file_names = core.get_genome_file_names()
+    for chromosome in genome_file_names:
         motifReplicationTiming = get_motif_rep_time(chromosome)
         numberOfPointsInBin = core.split_to_bins(motifReplicationTiming,
                                           core.BIN_START)

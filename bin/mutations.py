@@ -24,7 +24,8 @@ def get_mutation_rep_time(mutation_file, sample_name):
     mutation_rep_time = []
     # We consider chromosomes separately to avoid memory overflow:
     # All genome in str format ~ 3.1 GB - too much for RAM in my PC
-    for chromosome in core.GENOME_FILE_NAMES:
+    genome_file_names = core.get_genome_file_names()
+    for chromosome in genome_file_names:
         sys.stdout.write(chromosome + ', ')
         sys.stdout.flush()
         mutations_list = core.read_mutations(mutation_file,
@@ -32,7 +33,7 @@ def get_mutation_rep_time(mutation_file, sample_name):
                                            chromosome=chromosome,
                                            sample_names=[sample_name],
                                            final_nucleotides=core.FINAL_NUCL)
-        with open(core.GENOME_FILE_NAMES[chromosome]) as genome_file:
+        with open(genome_file_names[chromosome]) as genome_file:
             genome = genome_file.read()
         for index, mutation in mutations_list.iterrows():
             # FIXME: Considering mutations_list 20 times - unefficient

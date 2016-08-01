@@ -11,7 +11,8 @@ BREAST_DIR = os.path.join(HOME, 'breast_canser_data')
 REP_TIME_FILE = os.path.join(BREAST_DIR, 'replicationTiming')
 # Borders of bins, where we collect replication times
 BIN_START = [10 * i for i in range(9)]
-
+IS_REP_TIME_SETS_READY = False
+REP_TIME_SET = 0
 
 def read_mutations(mutations_file, mutation_type='', chromosome='',\
                    sample_names='', final_nucleotides=''):
@@ -40,18 +41,16 @@ def read_mutations(mutations_file, mutation_type='', chromosome='',\
 
 
 
-def get_genome_file_names(genome_dir):
+def get_genome_file_names():
     """ in: directory with genome sequence files by chromosomes
     out: a dictionary genome_file_names[chrNum] = full/path/to/seq/file"""
     genome_file_names = {}
-    for name in os.listdir(genome_dir):
-        full_path = os.path.join(genome_dir, name)
+    for name in os.listdir(GENOME_DIR):
+        full_path = os.path.join(GENOME_DIR, name)
         if os.path.isfile(full_path):
             genome_file_names[name[20:]] = full_path
     return genome_file_names
 
-
-GENOME_FILE_NAMES = get_genome_file_names(GENOME_DIR)
 
 def create_rep_time_set():
     """ returns dict with data from replication timing file
@@ -60,6 +59,7 @@ def create_rep_time_set():
     data = pandas.read_csv(REP_TIME_FILE, sep=' ', dtype={'chromosome': str})
     replication_timing_set = {}
     # GENOME_FILE_NAMES[chromosome] = '/path/to/genome/'
+    GENOME_FILE_NAMES = get_genome_file_names()
     for chromosome in GENOME_FILE_NAMES:
         mask = data.chromosome == chromosome
         replication_timing_set[chromosome] = data[mask]
@@ -68,8 +68,6 @@ def create_rep_time_set():
                                                        inplace=True)
     return replication_timing_set
 
-REP_TIME_SET = create_rep_time_set()
-
 
 def calculate_replication_timing(chromosome, position):
     """ Linear approximation of replication time between two points
@@ -77,6 +75,11 @@ def calculate_replication_timing(chromosome, position):
     known replication time
     in: chromosome number and position in this chromosome
     out: linear approximation of replication timing"""
+    global REP_TIME_SET
+    if not IS_REP_TIME_SETS_READY:
+        REP_TIME_SET = create_rep_time_set()
+        IS_REP_TIME_SETS_READY = True
+
     rep_time_frame = REP_TIME_SET[chromosome]
     if position in rep_time_frame.index:
         return float(rep_time_frame.ix[position])
