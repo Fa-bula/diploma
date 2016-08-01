@@ -45,10 +45,10 @@ def get_genome_file_names():
     """ in: directory with genome sequence files by chromosomes
     out: a dictionary genome_file_names[chrNum] = full/path/to/seq/file"""
     genome_file_names = {}
-    for name in os.listdir(GENOME_DIR):
-        full_path = os.path.join(GENOME_DIR, name)
-        if os.path.isfile(full_path):
-            genome_file_names[name[20:]] = full_path
+    files_list = get_only_files(GENOME_DIR)
+    for path in files_list:
+        chromosome = os.path.basename(path)[20:]
+        genome_file_names[chromosome] = path
     return genome_file_names
 
 
