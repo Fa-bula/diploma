@@ -7,7 +7,7 @@ FINAL_NUCL = ['G', 'T']         # final nucleotide
 
 HOME = '/home/bulat/diploma/'
 GENOME_DIR = os.path.join(HOME, 'genome/seq')
-BREAST_DIR = os.path.join(HOME, 'breast_canser_data')
+BREAST_DIR = os.path.join(HOME, 'breast')
 REP_TIME_FILE = os.path.join(BREAST_DIR, 'replicationTiming')
 # Borders of bins, where we collect replication times
 BIN_START = [10 * i for i in range(9)]
@@ -52,11 +52,11 @@ def get_genome_file_names():
     return genome_file_names
 
 
-def create_rep_time_set():
+def create_rep_time_set(rep_time_file):
     """ returns dict with data from replication timing file
     replication_timing_sets[chromosome] = pandas.DataFrame('position',
     'replication_timing')"""
-    data = pandas.read_csv(REP_TIME_FILE, sep=' ', dtype={'chromosome': str})
+    data = pandas.read_csv(rep_time_file, sep=' ', dtype={'chromosome': str})
     replication_timing_set = {}
     # GENOME_FILE_NAMES[chromosome] = '/path/to/genome/'
     GENOME_FILE_NAMES = get_genome_file_names()
@@ -76,8 +76,9 @@ def calculate_replication_timing(chromosome, position):
     in: chromosome number and position in this chromosome
     out: linear approximation of replication timing"""
     global REP_TIME_SET
+    global IS_REP_TIME_SETS_READY
     if not IS_REP_TIME_SETS_READY:
-        REP_TIME_SET = create_rep_time_set()
+        REP_TIME_SET = create_rep_time_set(REP_TIME_FILE)
         IS_REP_TIME_SETS_READY = True
 
     rep_time_frame = REP_TIME_SET[chromosome]

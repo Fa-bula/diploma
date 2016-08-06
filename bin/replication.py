@@ -31,5 +31,5 @@ def wig2csv(wig_filename, out_filename):
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        sys.exit('usage: {0} input.wig output.txt'.format(sys.argv[0]))
+        sys.exit('usage: {0} input.wig output.csv'.format(sys.argv[0]))
     wig2csv(sys.argv[1], sys.argv[2])
