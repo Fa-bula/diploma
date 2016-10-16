@@ -25,19 +25,20 @@ def get_motif_rep_time(chromosome):
                     .format(chromosome, first_occurence + 2)
             motif_rep_time.append(replication_timing)
             first_occurence = genome.find(motif, first_occurence + 1)
+    del genome
     return motif_rep_time
 
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print "Usage {0} {1}".format(sys.argv[0], "out_directory")
-        sys.exit()
+        sys.exit("Usage {0} outDir".format(sys.argv[0]))
     genome_file_names = core.get_genome_file_names()
     for chromosome in genome_file_names:
         motifReplicationTiming = get_motif_rep_time(chromosome)
-        numberOfPointsInBin = core.split_to_bins(motifReplicationTiming,
-                                          core.BIN_START)
+        print "Chromosome #{0} motifs has been considered\n".format(chromosome)
         outFileName = os.path.join(sys.argv[1], chromosome)
-        with open(outFileName, 'w') as outFile:
-            for pointNumber in numberOfPointsInBin:
-                outFile.write(str(pointNumber) + '\n')
+        with open(outFileName, 'w') as fout:
+            for time in motifReplicationTiming:
+                fout.write(str(time) + '\n')
+        del motifReplicationTiming
+

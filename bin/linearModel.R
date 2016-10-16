@@ -21,14 +21,23 @@ for (fileName in probabilityFiles) {
     fullPath = file.path(frequencyDir, fileName)
     frequencyTable <- read.csv(fullPath, encoding="utf-8",
                                  header=T, sep='\t')
-    model <- lm(frequency ~ replicationTiming, data=frequencyTable)
+    frequencyTable$bin_middle = (frequencyTable$bin_start + frequencyTable$bin_end) / 2
+    model <- lm(frequency ~ bin_middle, data=frequencyTable)
+    ## Use glm
     
     png(file.path(outDir, paste(fileName, "png", sep=".")))
-    plot(frequencyTable$replicationTiming,
-         frequencyTable$frequency,
-         main = paste("Sample", fileName),
-         xlab = "replicationTiming",
-         ylab = "APOBEC mutation frequency")
+    plot(as.table(setNames(frequencyTable$frequency, frequencyTable$bin_middle)),
+         main=paste("Sample", fileName),
+         xlab = "replication timing",
+         ylab = "APOBEG mutation frequency",
+         xaxt="n")
+    axis(side=1, at=seq(10, 90, 10), labels=NULL)
+    ## plot(frequencyTable$replicationTiming,
+    ##      frequencyTable$frequency,
+    ##      main = paste("Sample", fileName),
+    ##      xlab = "replicationTiming",
+    ##      ylab = "APOBEC mutation frequency")
+    
     abline(model)
     dev.off()
 
@@ -41,16 +50,20 @@ enrichmentTable <- read.csv(enrichmentFileName, encoding="utf-8",
                             header=T, sep='\t')
 
 mergedTable <- merge(enrichmentTable, coeffTable, by="Sample")
+write.csv(mergedTable, 'merged')
 ## Very strange sample
 ## TODO: check this sample
 ## mergedTable <- mergedTable[mergedTable$Sample != "PD4120a",]
 
-## finalModel <- lm(Coeff ~ APOBEC_enrich, data=mergedTable)
+finalModel <- lm(Coeff ~ APOBEC_enrich, data=mergedTable)
 png(file.path(outDir, "!finalPlot.png"))
 plot(as.numeric(as.character(mergedTable$APOBEC_enrich)),
      mergedTable$Coeff,
      main = "final plot",
      xlab = "APOBEC-enrichment",
      ylab = "Coeff")
-## abline(finalModel)
+abline(finalModel)
+summary(finalModel)
+error <- finalModel$residuals
+sprintf("RMSE: %g", sqrt(mean(error^2)))
 dev.off()

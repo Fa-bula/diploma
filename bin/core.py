@@ -9,8 +9,8 @@ HOME = '/home/bulat/diploma/'
 GENOME_DIR = os.path.join(HOME, 'genome/seq')
 BREAST_DIR = os.path.join(HOME, 'breast')
 REP_TIME_FILE = os.path.join(BREAST_DIR, 'replicationTiming')
-# Borders of bins, where we collect replication times
-BIN_START = [10 * i for i in range(9)]
+# Number of bins to put replication timings
+BIN_QUANTITY = 10
 IS_REP_TIME_SETS_READY = False
 REP_TIME_SET = 0
 

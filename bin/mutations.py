@@ -34,7 +34,7 @@ def get_mutation_rep_time(mutation_file, sample_name):
                                            sample_names=[sample_name],
                                            final_nucleotides=core.FINAL_NUCL)
         with open(genome_file_names[chromosome]) as genome_file:
-            genome = genome_file.read()
+            genom = genome_file.read()
         for index, mutation in mutations_list.iterrows():
             # FIXME: Considering mutations_list 20 times - unefficient
             position = mutation['positionFrom']
