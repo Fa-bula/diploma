@@ -5,7 +5,7 @@ import pandas
 MOTIFS = ['TCT', 'TCA']         # initial motif
 FINAL_NUCL = ['G', 'T']         # final nucleotide
 
-HOME = '/home/bulat/diploma/'
+HOME = '/home/fa_bula/diploma/'
 GENOME_DIR = os.path.join(HOME, 'genome/seq')
 BREAST_DIR = os.path.join(HOME, 'breast')
 REP_TIME_FILE = os.path.join(BREAST_DIR, 'replicationTiming')

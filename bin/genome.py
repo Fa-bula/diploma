@@ -2,6 +2,7 @@
 """Transforms all .fa files in given directory to sequence of
 nucleotides and writes it to output directory"""
 import sys
+sys.path.append('/home/fa_bula/diploma/bin/')
 import os
 import core
 

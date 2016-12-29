@@ -2,6 +2,7 @@
 """ Checks is nucleotides in mutation file placed according to genome
 Genome sequence files should be named like "hs_ref_GRCh37.p5_chr1" """
 import sys
+sys.path.append('/home/fa_bula/diploma/bin/')
 import core
 
 def check_chromosome(genome_file, mutations_file, chromosome):

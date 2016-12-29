@@ -1,6 +1,7 @@
 #!/usr/bin/python
 """ Removes indel mutations and exsome samples from mutations file"""
 import sys
+sys.path.append('/home/fa_bula/diploma/bin/')
 import core
 
 
