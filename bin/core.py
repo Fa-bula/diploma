@@ -2,7 +2,7 @@
 """ This module include basic functions to work with mutations"""
 import os
 import pandas
-MOTIFS = ['TCT', 'TCA']         # initial motif
+# MOTIFS = ['TCT', 'TCA']         # initial motif
 FINAL_NUCL = ['G', 'T']         # final nucleotide
 
 HOME = '/home/fa_bula/diploma/'
@@ -14,8 +14,8 @@ BIN_QUANTITY = 10
 IS_REP_TIME_SETS_READY = False
 REP_TIME_SET = 0
 
-def read_mutations(mutations_file, mutation_type='', chromosome='',\
-                   sample_names='', final_nucleotides=''):
+def read_mutations(mutations_file, mutation_type='', chromosomes='',\
+                   sample_names='', final_nucleotides='', init_nucleotides=''):
     """ Reads mutation from mutations_file with given mutation_type,
     final nucleotide in final_nucl and sample in sample_names.
     Returns list of mutations, every item in list is dictionary,
@@ -28,14 +28,17 @@ def read_mutations(mutations_file, mutation_type='', chromosome='',\
     if mutation_type:
         mask = mutations['mutationType'] == mutation_type
         mutations = mutations[mask]
-    if chromosome:
-        mask = mutations['chromosome'] == chromosome
+    if chromosomes:
+        mask = mutations.isin[chromosomes]['chromosome']
         mutations = mutations[mask]
     if sample_names:
         mask = mutations.isin(sample_names)['sampleName']
         mutations = mutations[mask]
     if final_nucleotides:
         mask = mutations.isin(final_nucleotides)['finalNucl']
+        mutations = mutations[mask]
+    if init_nucleotides:
+        mask = mutations.isin(init_nucleotides)['initialNucl']
         mutations = mutations[mask]
     return mutations
 
