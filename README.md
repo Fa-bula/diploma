@@ -18,7 +18,9 @@
   2. Для каждого семпла находим replication timing всех позиций
   нуклеотидов, входящих в APOBEC мотив (MOTIFS = ['TCT', 'TCA']):
   bin/motif.py
-  3. Делим весь интервал значений replication timing на несколько бинов.
+  3. Делим replication timing позиций в геноме с требуемым мотивом на равные бины:
+  bin/split.py  
+  4. Делим весь интервал значений replication timing на несколько бинов.
   (BIN_START = [10 * i for i in range(9)]). Затем, вычисляем частоту мутаций
   в каждом бине (Делим количество мутаций в бине на количество APOBEC-мотивов):
   bin/frequency.py
