@@ -4,6 +4,8 @@ frequency = {#mutations in bin[i]} / {#APOBEC-motifs in bin[i]}"""
 from __future__ import division # This way {int} / {int} = {float}
 import os
 import sys
+
+sys.path.append('/home/fa_bula/diploma/bin/')
 import core
 # from operator import add
 import numpy as np

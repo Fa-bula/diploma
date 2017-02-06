@@ -1,9 +1,10 @@
 #!/usr/bin/python
 """ Find out replication timing of all nucleotides, included in
 APOBEC-motif: MOTIFS = ['TCT', 'TCA']"""
-import core
 import sys
 import os
+sys.path.append('/home/fa_bula/diploma/bin/')
+import core
 
 def get_motif_rep_time(chromosome):
     """ Returns list of replication timings of positions in genome
