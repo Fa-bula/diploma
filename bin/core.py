@@ -2,7 +2,8 @@
 """ This module include basic functions to work with mutations"""
 import os
 import pandas
-# MOTIFS = ['TCT', 'TCA']         # initial motif
+MOTIFS = ['TCT', 'TCA']         # default initial motif
+INIT_NUCL = ['C']
 FINAL_NUCL = ['G', 'T']         # final nucleotide
 
 HOME = '/home/fa_bula/diploma/'
@@ -28,9 +29,6 @@ def read_mutations(mutations_file, mutation_type='', chromosomes='',\
     if mutation_type:
         mask = mutations['mutationType'] == mutation_type
         mutations = mutations[mask]
-    if chromosomes:
-        mask = mutations.isin[chromosomes]['chromosome']
-        mutations = mutations[mask]
     if sample_names:
         mask = mutations.isin(sample_names)['sampleName']
         mutations = mutations[mask]
@@ -39,6 +37,9 @@ def read_mutations(mutations_file, mutation_type='', chromosomes='',\
         mutations = mutations[mask]
     if init_nucleotides:
         mask = mutations.isin(init_nucleotides)['initialNucl']
+        mutations = mutations[mask]
+    if chromosomes:
+        mask = mutations.isin(chromosomes)['chromosome']
         mutations = mutations[mask]
     return mutations
 
