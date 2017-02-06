@@ -38,7 +38,8 @@ def get_mutation_rep_time(mutation_file, sample_name):
             
     for index, mutation in mutations_list.iterrows():
         position = mutation['positionFrom']
-        motif = genome[position - 2: position + 1]
+        chromosome = mutation['chromosome']
+        motif = genome[chromosome][position - 2: position + 1]
         if motif in core.MOTIFS:
             rep_time = core.calculate_replication_timing(chromosome,
                                                          position)
