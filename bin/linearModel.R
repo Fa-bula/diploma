@@ -6,13 +6,14 @@ suppressMessages(library(lmtest))
 ## where coeff - regression coefficient from first part
 
 args = commandArgs(trailingOnly = TRUE) # Command line arguments
-if (length(args) != 3) {
+if (length(args) != 4) {
     scriptName <- "./linearModel.R"
-    sprintf("Usage: %s frequencyDir enrichment.txt outDir", scriptName)
+    sprintf("Usage: %s frequencyDir enrichment.txt outDir motif", scriptName)
 } else {
     frequencyDir <- args[1]
     enrichmentFileName <- args[2]
     outDir <- args[3]
+    motif <- args[4]
 }
 
 probabilityFiles <- list.files(frequencyDir)
@@ -25,7 +26,7 @@ for (fileName in probabilityFiles) {
     model <- lm(frequency ~ bin_middle, data=frequencyTable)
     ## Use glm
     
-    png(file.path(outDir, paste(fileName, "png", sep=".")))
+    ## png(file.path(outDir, paste(fileName, "png", sep=".")))
     plot(as.table(setNames(frequencyTable$frequency, frequencyTable$bin_middle)),
          main=paste("Sample", fileName),
          xlab = "replication timing",
@@ -50,20 +51,23 @@ enrichmentTable <- read.csv(enrichmentFileName, encoding="utf-8",
                             header=T, sep='\t')
 
 mergedTable <- merge(enrichmentTable, coeffTable, by="Sample")
-write.csv(mergedTable, 'merged')
+## write.csv(mergedTable, 'merged')
 ## Very strange sample
 ## TODO: check this sample
 ## mergedTable <- mergedTable[mergedTable$Sample != "PD4120a",]
 
 finalModel <- lm(Coeff ~ APOBEC_enrich, data=mergedTable)
-png(file.path(outDir, "!finalPlot.png"))
+png(file.path(outDir, paste(motif, "png", sep=".")))
 plot(as.numeric(as.character(mergedTable$APOBEC_enrich)),
      mergedTable$Coeff,
-     main = "final plot",
+     main = motif,
      xlab = "APOBEC-enrichment",
      ylab = "Coeff")
 abline(finalModel)
-summary(finalModel)
+sprintf("motif: %s", motif)
+summary(finalModel)$coef[,4][2]
+summary(finalModel)$coef[,1][2]
+## summary(finalModel)
 error <- finalModel$residuals
 sprintf("RMSE: %g", sqrt(mean(error^2)))
 dev.off()
