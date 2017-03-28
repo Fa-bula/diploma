@@ -2,10 +2,6 @@
 """ This module include basic functions to work with mutations"""
 import os
 import pandas
-MOTIFS = ['TCT', 'TCA']         # default initial motif
-INIT_NUCL = ['C']
-FINAL_NUCL = ['G', 'T']         # final nucleotide
-
 HOME = '/home/fa_bula/diploma/'
 GENOME_DIR = os.path.join(HOME, 'genome/seq')
 BREAST_DIR = os.path.join(HOME, 'breast')
@@ -15,34 +11,60 @@ BIN_QUANTITY = 10
 IS_REP_TIME_SETS_READY = False
 REP_TIME_SET = 0
 
-def read_mutations(mutations_file, mutation_type='', chromosomes='',\
-                   sample_names='', final_nucleotides='', init_nucleotides=''):
-    """ Reads mutation from mutations_file with given mutation_type,
-    final nucleotide in final_nucl and sample in sample_names.
+class Mutation_Signature:
+    def __init__(self, pair, type):
+        "Make mutation signature from pair (<MOTIF> <FINAL NUCLEOTIDE>)"
+        if type == "subs":
+            self.motif = pair[0]
+            self.initial = pair[0][len(pair[0]) / 2]
+            self.final = pair[1]
+            self.type = type
+        else:
+            raise NotImplementedError
+
+    def __str__(self):
+        if self.type == "subs":
+            return "{0}_{1}".format(self.motif, self.final)            
+        else:
+            raise NotImplementedError
+
+    def __repr__(self):
+        if self.type == "subs":
+            return "{0}: {1}->{2}".format(self.motif, self.initial, self.final)
+        else:
+            raise NotImplementedError
+
+        
+def read_mutations(infile, genome='', sample_names='', signature=''):
+    # FIXME: Checks only final/initial nucleotide (not a motif)
+    """ Reads mutations from infile. signatures is a list of Mutation_Signature instances,
+    describing possible mutations.
     Returns list of mutations, every item in list is dictionary,
     describing individual mutation"""
+    # initials = [s.initial for s in signatures]
+    # finals = [s.final for s in signatures]
+    # if len(initials) != sen(set(initials)) or len(finals) != len(set(finals)):
+    #     raise NotImplementedError # In this case function can return duplicate mutations
     column_names = ['sampleName', 'mutationType', 'chromosome',
                     'positionFrom', 'positionTo', 'initialNucl',
                     'finalNucl', 'info']
-    mutations = pandas.read_csv(mutations_file, sep="\t", header=None,
+    mutations = pandas.read_csv(infile, sep="\t", header=None,
                            names=column_names, index_col=False)
-    if mutation_type:
-        mask = mutations['mutationType'] == mutation_type
-        mutations = mutations[mask]
     if sample_names:
         mask = mutations.isin(sample_names)['sampleName']
         mutations = mutations[mask]
-    if final_nucleotides:
-        mask = mutations.isin(final_nucleotides)['finalNucl']
-        mutations = mutations[mask]
-    if init_nucleotides:
-        mask = mutations.isin(init_nucleotides)['initialNucl']
-        mutations = mutations[mask]
-    if chromosomes:
+    if genome:
+        chromosomes = [ch for ch in genome]
         mask = mutations.isin(chromosomes)['chromosome']
         mutations = mutations[mask]
+    # Filter mutations, fitting given signature
+    if signature:
+        # Create mask for choosing mutations, fitting given signature
+        mask = ((mutations['mutationType'] == signature.type) &
+        (mutations['finalNucl'] == signature.final) & (mutations['initialNucl'] == signature.initial))
+        # Filter DataFrame, using created mask
+        mutations = mutations[mask]
     return mutations
-
 
 
 def get_genome_file_names():
@@ -127,3 +149,4 @@ def split_to_bins(points, bin_start):
             number_of_points_in_bin[-1] += 1
 
     return number_of_points_in_bin
+ 
