@@ -1,19 +1,19 @@
 #!/usr/bin/python
-""" Find out replication timing of all nucleotides, included in
-APOBEC-motif: MOTIFS = ['TCT', 'TCA']"""
+""" Find out replication timing of all nucleotides, included in given motifs"""
 import sys
 import os
 sys.path.append('/home/fa_bula/diploma/bin/')
 import core
 
-def get_motif_rep_time(chromosome):
+def get_motif_rep_time(chromosome, signatures):
     """ Returns list of replication timings of positions in genome
-    with particular motif and given chromosome"""
+    with particular motifs and given chromosome"""
     motif_rep_time = []
     genome_file_names = core.get_genome_file_names()
     with open(genome_file_names[chromosome], 'r') as f:
         genome = f.read()
-    for motif in core.MOTIFS:
+    for sig in signatures:
+        motif = sig.motif
         # First occurence of beginning of motif
         first_occurence = genome.find(motif, 0)
         while first_occurence >= 0:
@@ -42,4 +42,3 @@ if __name__ == '__main__':
             for time in motifReplicationTiming:
                 fout.write(str(time) + '\n')
         del motifReplicationTiming
-
