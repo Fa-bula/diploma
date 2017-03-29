@@ -1,6 +1,8 @@
-# diploma
+# Исследование зависимости частоты раковых мутаций от степени влияния белка APOBEC
 
-* Подготовка исходных данных:
+## План исследования
+
+### Подготовка исходных данных:
   1. Удаляем вставки и делеции (indel), а также экзомные семплы:
   bin/filter.py
   2. Преобразуем файлы генома с расширением .fa в последовательность
@@ -15,27 +17,26 @@
   7. Генерируем комплиментарные пары мутационных сигнатур (в текущей версии -- все 96
      трехбуквенных пар сигнатур): bin/generate.py
 
-* Для каждого семпла исследуем зависимость частоты мутаций от replication timing:
+### Для каждого семпла исследуем зависимость частоты мутаций от replication timing:
   1. Для каждого семпла находим replication timing всех мутировавших (согласно выбранной сигнатуре)
   нуклеотидов: bin/mutations.py
   2. Для каждого семпла находим replication timing всех позиций нуклеотидов в геноме,
   входящих в мотивы текущей пары комплиментарных сигнатур: bin/motif.py
-  3. Делим массив replication timing'ов, найденных в предыдущем пункте, на равные бины:
-  bin/split.py
-  4. Делим весь интервал значений replication timing на несколько бинов.
-  (BIN_START = [10 * i for i in range(9)]). Затем, вычисляем частоту мутаций
-  в каждом бине (Делим количество мутаций в бине на количество APOBEC-мотивов):
-  bin/frequency.py
+  3. Делим массив replication timing'ов, найденных в предыдущем пункте, на BIN_QUANTITY = 10
+  равных бинов: bin/split.py
+  4. Вычисляем частоту мутаций в каждом бине (Делим количество мутаций в бине на количество
+  APOBEC-мотивов): bin/frequency.py
   
-* Исследуем зависимость наклона графика частоны мутаций от APOBEC-enrichment: bin/linearModel.R
+### Исследуем зависимость наклона графика частоны мутаций от APOBEC-enrichment: bin/linearModel.R
   1. Строим линейную регрессию частоты APOGEC-мутаций от replication timing
   и для каждого семпла сохраняем коэффициент наклона регрессионной прямой
   2. Строим линейную регрессию коэффициента наклона, найденного в предыдущем
   пункте от APOBEC-enrichment
 
-* Повторям последние два шага для всех сгеерированных комплиментарных пар сигнатур
+### Повторям последние два шага для всех сгенерированных комплиментарных пар сигнатур
 
-Полезные ссылки (ссылки на ftp гитхаб не отображает, но их можно посмотреть в [сыром виде этого файла](https://raw.githubusercontent.com/Fa-bula/diploma/master/README.md?token=AJHajQHKS2BXy2uASf3yPNw8L5Hnk6dVks5XaFz1wA%3D%3D)):
+## Полезные ссылки
+(ссылки на ftp гитхаб не отображает, но их можно посмотреть в [сыром виде этого файла](https://raw.githubusercontent.com/Fa-bula/diploma/master/README.md?token=AJHajQHKS2BXy2uASf3yPNw8L5Hnk6dVks5XaFz1wA%3D%3D)):
 * [Breast canser mutations](ftp://ftp.sanger.ac.uk/pub/cancer/AlexandrovEtAl/somatic_mutation_data/Breast/Breast_clean_somatic_mutations_for_signature_analysis_apr15.txt)
 * [Breast catalog](ftp://ftp.sanger.ac.uk/pub/cancer/AlexandrovEtAl/mutational_catalogs/genomes/Breast/Breast_genomes_mutational_catalog_192_subs_with_strand_bias.txt "Список геномных семплов")
 * [Lung canser mutations](ftp://ftp.sanger.ac.uk/pub/cancer/AlexandrovEtAl/somatic_mutation_data/Lung%20Adeno/Lung%20Adeno_clean_somatic_mutations_for_signature_analysis.txt)
