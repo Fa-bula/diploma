@@ -36,20 +36,20 @@ class Mutation_Signature:
 
         
 def read_mutations(infile, genome='', sample_names='', signature=''):
-    # FIXME: Checks only final/initial nucleotide (not a motif)
+    # TODO: Implement checking entire motif (init/final check now)
     """ Reads mutations from infile. signatures is a list of Mutation_Signature instances,
     describing possible mutations.
     Returns list of mutations, every item in list is dictionary,
     describing individual mutation"""
-    # initials = [s.initial for s in signatures]
-    # finals = [s.final for s in signatures]
-    # if len(initials) != sen(set(initials)) or len(finals) != len(set(finals)):
-    #     raise NotImplementedError # In this case function can return duplicate mutations
     column_names = ['sampleName', 'mutationType', 'chromosome',
                     'positionFrom', 'positionTo', 'initialNucl',
                     'finalNucl', 'info']
     mutations = pandas.read_csv(infile, sep="\t", header=None,
-                           names=column_names, index_col=False)
+                                names=column_names, index_col=False,
+                                dtype={'sampleName': str, 'mutationType': str,
+                                       'chromosome': str, 'positionFrom': int,
+                                       'positionTo': int, 'initialNucl': str,
+                                       'finalNucl': str, 'info': str})
     if sample_names:
         mask = mutations.isin(sample_names)['sampleName']
         mutations = mutations[mask]
