@@ -10,7 +10,7 @@ import motif
 import split
 import frequency
 import generate
-
+import shutil
 
 def create_if_needed(*dirnames):
     """ Check are given directories exist and create them,
@@ -33,11 +33,11 @@ if __name__ == '__main__':
     signatures = signature_pairs[int(os.environ['SGE_TASK_ID']) - 1] # Cuz SGE_TASK_ID begins with 1
     print "Considering {0} mutation signatures".format(signatures)
 
-    # Creating result subdirecories for curren
+    # Creating result subdirectories for current signature pair
     res_dir = os.path.join(sys.argv[3], "{0}+{1}".format(signatures[0], signatures[1]))
     mut_dir = os.path.join(res_dir, 'mutation_rep_time')
     gen_dir = os.path.join(res_dir, 'genome_rep_time')
-    freq_dir = os.path.join(res_dir, 'mutations_frequency')
+    freq_dir = os.path.join(res_dir, 'mutation_frequency')
     gen_bins = os.path.join(res_dir, 'genome_rep_time_bins')
     create_if_needed(res_dir, mut_dir, gen_dir, freq_dir)
 
@@ -75,3 +75,7 @@ if __name__ == '__main__':
                                                  replication_timings)
             outFile = os.path.join(freq_dir, os.path.basename(mutation_file))
             freq.to_csv(outFile, sep='\t')
+
+    # Remove interim results
+    shutil.rmtree(mut_dir)
+    shutil.rmtree(gen_dir)
