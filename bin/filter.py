@@ -1,5 +1,5 @@
 #!/usr/bin/python
-""" Removes indel mutations and exsome samples from mutations file"""
+""" Removes exsome samples from mutations file"""
 import sys
 sys.path.append('/home/fa_bula/diploma/bin/')
 import core
@@ -7,15 +7,14 @@ import core
 
 def filterMutations(mutations_file, catalogFileName, out_file):
     """ in: file with mutations; catalog with list of genome samples
-    out: writes all mutations (exclude indel mutations and exome samples)
-    to out file, specified by out_file; returns nothing """
+    out: writes all mutations (exclude exome samples) to out_file; returns nothing """
     genomeSampleNames = []      # all samples except exome samples
     with open(catalogFileName) as catalogFile:
         genomeSampleNames = catalogFile.readline()[:-1].split('\t')
         genomeSampleNames.pop(0) # First and second words are "Mutation type"
 
-    mutations = core.read_mutations(mutations_file, mutation_type='subs',
-                                  sample_names=genomeSampleNames)
+    mutations = core.read_mutations(infile=mutations_file,
+                                    sample_names=genomeSampleNames)
     mutations.to_csv(out_file, sep='\t', header=False, index=False)
     return
 
