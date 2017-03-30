@@ -1,28 +1,37 @@
+#!/bin/bash
 # Script to perform all needed calculations and wait for it finish
-# Remove old .log files
-rm ../logs/*
 
-# Run program with specified destination of errors and output
-clear
-date > ../logs/exec_time	# Write start time at file
+ROOT=../lung/			# Dir with filtered_mutations.txt and enrichment.txt
+LOGS=$ROOT/logs/		# qsub .log files directory
+RESULTS=$ROOT/results/		# Dir used to store interim results
+PLOTS=$ROOT/plots/		# Dir for final plots
+
+rm $LOGS/*			# Remove old .log files
+clear				# Clear terminal screen
+date > $LOGS/exec_time	# Write start time at file
+
 # Python part
-# FIXME: maybe loop?
-qsub -t 1-9 -sync y -cwd -S /usr/bin/python -e ../logs/ -o ../logs/ calculate.py ../breast/mutations.txt ../breast/enrichment ../breast_results
-qsub -t 10-19 -sync y -cwd -S /usr/bin/python -e ../logs/ -o ../logs/ calculate.py ../breast/mutations.txt ../breast/enrichment ../breast_results
-qsub -t 20-29 -sync y -cwd -S /usr/bin/python -e ../logs/ -o ../logs/ calculate.py ../breast/mutations.txt ../breast/enrichment ../breast_results
-qsub -t 30-39 -sync y -cwd -S /usr/bin/python -e ../logs/ -o ../logs/ calculate.py ../breast/mutations.txt ../breast/enrichment ../breast_results
-qsub -t 40-49 -sync y -cwd -S /usr/bin/python -e ../logs/ -o ../logs/ calculate.py ../breast/mutations.txt ../breast/enrichment ../breast_results
-qsub -t 50-59 -sync y -cwd -S /usr/bin/python -e ../logs/ -o ../logs/ calculate.py ../breast/mutations.txt ../breast/enrichment ../breast_results
-qsub -t 60-69 -sync y -cwd -S /usr/bin/python -e ../logs/ -o ../logs/ calculate.py ../breast/mutations.txt ../breast/enrichment ../breast_results
-qsub -t 70-79 -sync y -cwd -S /usr/bin/python -e ../logs/ -o ../logs/ calculate.py ../breast/mutations.txt ../breast/enrichment ../breast_results
-qsub -t 80-89 -sync y -cwd -S /usr/bin/python -e ../logs/ -o ../logs/ calculate.py ../breast/mutations.txt ../breast/enrichment ../breast_results
-qsub -t 90-96 -sync y -cwd -S /usr/bin/python -e ../logs/ -o ../logs/ calculate.py ../breast/mutations.txt ../breast/enrichment ../breast_results
+
+# Filtering exome samples
+qsub -sync y -cwd -S /usr/bin/python -e $LOGS -o $LOGS filter.py $ROOT/raw_mutations.txt $ROOT/catalog.txt $ROOT/filtered_mutations.txt
+
+# TODO: Usage of check.py
+
+# Transform .wig to .csv
+qsub -sync y -cwd -S /usr/bin/python -e $LOGS -o $LOGS replication.py $ROOT/rep_time.wig $ROOT/rep_time.csv
+
+# Perform all remaining computations for every mutation signature pair
+for i in {1..96..8}
+do
+    qsub -t $i-$((i + 7)) -sync y -cwd -S /usr/bin/python -e $LOGS -o $LOGS calculate.py $ROOT/filtered_mutations.txt $ROOT/enrichment.txt $RESULTS
+done
 
 # R part
-RESULTS=../breast_results/*/mutations_frequency/
-for dir in $RESULTS; do
-    qsub  -cwd -S /usr/bin/Rscript -e ../logs/ -o ../logs/ linearModel.R $dir ../breast/enrichment ../plots $(basename $(dirname $dir))
+FREQ=$RESULTS/*/mutation_frequency/
+for dir in $FREQ; do
+    qsub -cwd -S /usr/bin/Rscript -e $LOGS -o $LOGS linearModel.R $dir $ROOT/enrichment.txt $PLOTS $(basename $(dirname $dir))
 done
+
 echo "Calculations, job has been finished!"
-date >> ../logs/exec_time	# Append end time to file
-cat ../logs/exec_time
+date >> $LOGS/exec_time		# Append end time to file
+cat $LOGS/exec_time		# Show running start and end times
