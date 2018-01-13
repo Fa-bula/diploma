@@ -25,14 +25,16 @@ for (fileName in probabilityFiles) {
     frequencyTable$bin_middle = (frequencyTable$bin_start + frequencyTable$bin_end) / 2
     model <- lm(frequency ~ bin_middle, data=frequencyTable)
     ## Use glm
-    
+
+    png(file.path(outDir, paste(fileName, motif, "png", sep=".")))
     ## png(file.path(outDir, paste(fileName, "png", sep=".")))
     plot(as.table(setNames(frequencyTable$frequency, frequencyTable$bin_middle)),
-         main=paste("Sample", fileName),
+         main=paste("Sample", fileName, motif),
          xlab = "replication timing",
-         ylab = "APOBEG mutation frequency",
-         xaxt="n")
-    axis(side=1, at=seq(10, 90, 10), labels=NULL)
+         ylab = "APOBEC mutation frequency",
+         type = "p")
+    ## axis(side=1, at=seq(10, 90, 10), labels=NULL)
+    
     ## plot(frequencyTable$replicationTiming,
     ##      frequencyTable$frequency,
     ##      main = paste("Sample", fileName),
