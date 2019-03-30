@@ -23,8 +23,8 @@ def create_if_needed(*dirnames):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        sys.exit("Usage {0} mutations enrichment results_dir".format(sys.argv[0]))
+    if len(sys.argv) != 5:
+        sys.exit("Usage {0} mutations enrichment replication results_dir".format(sys.argv[0]))
 
     # generate.py part
     signature_pairs = generate.generate_signatures(3)
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     print "Considering {0} mutation signatures".format(signatures)
 
     # Creating result subdirectories for current signature pair
-    res_dir = os.path.join(sys.argv[3], "{0}+{1}".format(signatures[0], signatures[1]))
+    res_dir = os.path.join(sys.argv[4], "{0}+{1}".format(signatures[0], signatures[1]))
     mut_dir = os.path.join(res_dir, 'mutation_rep_time')
     gen_dir = os.path.join(res_dir, 'genome_rep_time')
     freq_dir = os.path.join(res_dir, 'mutation_frequency')
@@ -43,18 +43,22 @@ if __name__ == '__main__':
 
     # mutations.py part
     sample_names = mutations.get_sample_names(sys.argv[2])
+    mutations_count = {}
     for sample in sample_names:
-        print "Sample {0}\n".format(sample)
-        result = mutations.get_mutation_rep_time(sys.argv[1], sample, signatures)
+        result = mutations.get_mutation_rep_time(sys.argv[1], sample, signatures, sys.argv[3])
+        mutations_count[sample] = len(result)
         outFileName = os.path.join(mut_dir, sample)
         with open(outFileName, 'w') as fout:
             for repTime in result:
                 fout.write(str(repTime) + '\n')
+    with open(os.path.join(res_dir, 'mutations_count'), 'w') as fout:
+        for sample in mutations_count:
+            fout.write('{0}\t{1}\n'.format(sample, str(mutations_count[sample])))
     
     # motif.py part
     genome_file_names = core.get_genome_file_names()
     for chromosome in genome_file_names:
-        motifReplicationTiming = motif.get_motif_rep_time(chromosome, signatures)
+        motifReplicationTiming = motif.get_motif_rep_time(chromosome, signatures, sys.argv[3])
         print "Chromosome #{0} motifs has been considered\n".format(chromosome)
         outFileName = os.path.join(gen_dir, chromosome)
         with open(outFileName, 'w') as fout:

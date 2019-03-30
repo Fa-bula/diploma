@@ -5,7 +5,7 @@ import os
 sys.path.append('/home/fa_bula/diploma/bin/')
 import core
 
-def get_motif_rep_time(chromosome, signatures):
+def get_motif_rep_time(chromosome, signatures, replication_timing_file):
     """ Returns list of replication timings of positions in genome
     with particular motifs and given chromosome"""
     motif_rep_time = []
@@ -20,11 +20,13 @@ def get_motif_rep_time(chromosome, signatures):
             # One +1 because str.find finds start of motif, but we want center
             # Second +1 because str begins with 0th element
             replication_timing = core.calculate_replication_timing(chromosome,
-                                                           first_occurence + 2)
-            if replication_timing == -1:
-                print '\nuncalculatable replication time at {0}:{1}'\
+                                                                   first_occurence + 2,
+                                                                   replication_timing_file)
+            if replication_timing is None:
+                print 'uncalculatable replication time at {0}:{1}'\
                     .format(chromosome, first_occurence + 2)
-            motif_rep_time.append(replication_timing)
+            else:
+                motif_rep_time.append(replication_timing)
             first_occurence = genome.find(motif, first_occurence + 1)
     del genome
     return motif_rep_time

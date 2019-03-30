@@ -4,8 +4,6 @@ import os
 import pandas
 HOME = '/home/fa_bula/diploma/'
 GENOME_DIR = os.path.join(HOME, 'genome/seq')
-BREAST_DIR = os.path.join(HOME, 'breast')
-REP_TIME_FILE = os.path.join(BREAST_DIR, 'replicationTiming')
 # Number of bins to put replication timings
 BIN_QUANTITY = 10
 IS_REP_TIME_SETS_READY = False
@@ -41,27 +39,32 @@ def read_mutations(infile, genome='', sample_names='', signature=''):
     describing possible mutations.
     Returns list of mutations, every item in list is dictionary,
     describing individual mutation"""
-    column_names = ['sampleName', 'mutationType', 'chromosome',
-                    'positionFrom', 'positionTo', 'initialNucl',
-                    'finalNucl', 'info']
-    mutations = pandas.read_csv(infile, sep="\t", header=None,
-                                names=column_names, index_col=False,
-                                dtype={'sampleName': str, 'mutationType': str,
-                                       'chromosome': str, 'positionFrom': int,
-                                       'positionTo': int, 'initialNucl': str,
-                                       'finalNucl': str, 'info': str})
-    if sample_names:
-        mask = mutations.isin(sample_names)['sampleName']
+    # column_names = ['sampleName', 'mutationType', 'chromosome',
+    #                 'positionFrom', 'positionTo', 'initialNucl',
+    #                 'finalNucl', 'info']
+    mutations = pandas.read_csv(infile, sep="\t", header=0,
+                                # names=column_names,
+                                index_col=False,
+                                dtype={'Tumor_Sample_Barcode': str, 'Chromosome': str,
+                                       'Start_position': int, 'Reference_Allele': str,
+                                       'Tumor_Seq_Allele2': str, 'APOBEC_mutation': float,
+                                       'APOBEC_enrich': float, 'APOBEC_MutLoad_MinEstimate': int,
+                                       'Variant_Type': str})
+    sample_names_stripped = [s.strip() for s in sample_names]
+    if sample_names_stripped:
+        mask = mutations.isin(sample_names_stripped)['Tumor_Sample_Barcode']
         mutations = mutations[mask]
     if genome:
-        chromosomes = [ch for ch in genome]
-        mask = mutations.isin(chromosomes)['chromosome']
+        chromosomes = ['chr' + ch for ch in genome]
+        mask = mutations.isin(chromosomes)['Chromosome']
         mutations = mutations[mask]
+
     # Filter mutations, fitting given signature
     if signature:
         # Create mask for choosing mutations, fitting given signature
-        mask = ((mutations['mutationType'] == signature.type) &
-        (mutations['finalNucl'] == signature.final) & (mutations['initialNucl'] == signature.initial))
+        # mask = ((mutations['mutationType'] == signature.type) &
+        # (mutations['finalNucl'] == signature.final) & (mutations['initialNucl'] == signature.initial))
+        mask = ((mutations['Tumor_Seq_Allele2'] == signature.final) & (mutations['Reference_Allele'] == signature.initial))
         # Filter DataFrame, using created mask
         mutations = mutations[mask]
     return mutations
@@ -95,7 +98,7 @@ def create_rep_time_set(rep_time_file):
     return replication_timing_set
 
 
-def calculate_replication_timing(chromosome, position):
+def calculate_replication_timing(chromosome, position, replication_timing_file):
     """ Linear approximation of replication time between two points
     with known replication time. Returns -1 if one of neighbour has no
     known replication time
@@ -104,7 +107,7 @@ def calculate_replication_timing(chromosome, position):
     global REP_TIME_SET
     global IS_REP_TIME_SETS_READY
     if not IS_REP_TIME_SETS_READY:
-        REP_TIME_SET = create_rep_time_set(REP_TIME_FILE)
+        REP_TIME_SET = create_rep_time_set(replication_timing_file)
         IS_REP_TIME_SETS_READY = True
 
     rep_time_frame = REP_TIME_SET[chromosome]
@@ -121,7 +124,7 @@ def calculate_replication_timing(chromosome, position):
 
     if left_neighbour not in rep_time_frame.index or \
        right_neighbour not in rep_time_frame.index:
-        return -1
+        return None
 
     left_value = float(rep_time_frame.ix[left_neighbour])
     right_value = float(rep_time_frame.ix[right_neighbour])

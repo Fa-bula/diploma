@@ -18,10 +18,11 @@ def get_sample_names(enrichment_file):
     return sample_names
 
 
-def get_mutation_rep_time(mutation_file, sample_name, signatures):
+def get_mutation_rep_time(mutation_file, sample_name, signatures, replication_timing_file):
     """ Returns list with replication timings of mutated nucleotides
     with given sample name and mutation signatures"""
-    sys.stdout.write("\nConsidering {0} sample: ".format(sample_name))
+    sys.stdout.write("Considering {0} sample:\n".format(sample_name))
+    
     mutation_rep_time = []
     genome_file_names = core.get_genome_file_names()
     genome = {}
@@ -36,16 +37,18 @@ def get_mutation_rep_time(mutation_file, sample_name, signatures):
                                              signature=sig)
     
         for index, mutation in mutations_list.iterrows():
-            position = mutation['positionFrom']
-            chromosome = mutation['chromosome']
+            position = mutation['Start_position']
+            chromosome = mutation['Chromosome'][3:]
             motif = genome[chromosome][position - 2: position + 1]
             if motif == sig.motif:
                 rep_time = core.calculate_replication_timing(chromosome,
-                                                             position)
-                if rep_time == -1:
+                                                             position,
+                                                             replication_timing_file)
+                if rep_time is None:
                     print '\nuncalculatable replication time at\
                     {0}:{1}'.format(chromosome, position)
-                mutation_rep_time.append(rep_time)
+                else:
+                    mutation_rep_time.append(rep_time)
             
     del genome
     return mutation_rep_time

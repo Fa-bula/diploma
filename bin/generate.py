@@ -36,7 +36,7 @@ def generate_signatures(motif_length):
                 first = core.Mutation_Signature((pair[0], nucl), 'subs')
                 second = core.Mutation_Signature((pair[1], complementary_dict[nucl]), 'subs')
                 signatures.append((first, second))
-                                   
+    # signatures = [p for p in signatures if p[0].motif == "TCA" or p[0].motif == "TCT" or p[1].motif == "TCT" or p[1].motif == "TCA"]
     return signatures
                 
     

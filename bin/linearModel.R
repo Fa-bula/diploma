@@ -53,7 +53,7 @@ enrichmentTable <- read.csv(enrichmentFileName, encoding="utf-8",
                             header=T, sep='\t')
 
 mergedTable <- merge(enrichmentTable, coeffTable, by="Sample")
-## write.csv(mergedTable, 'merged')
+write.csv(mergedTable, motif)
 ## Very strange sample
 ## TODO: check this sample
 ## mergedTable <- mergedTable[mergedTable$Sample != "PD4120a",]
@@ -69,7 +69,7 @@ abline(finalModel)
 sprintf("motif: %s", motif)
 summary(finalModel)$coef[,4][2]
 summary(finalModel)$coef[,1][2]
-## summary(finalModel)
+summary(finalModel)
 error <- finalModel$residuals
 sprintf("RMSE: %g", sqrt(mean(error^2)))
 dev.off()
